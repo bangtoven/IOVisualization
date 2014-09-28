@@ -53,6 +53,8 @@
 #include "btt/list.h"
 #include "blktrace.h"
 
+#include "serialization.h"
+
 /*
  * You may want to increase this even more, if you are logging at a high
  * rate and see skipped/missed events
@@ -796,32 +798,32 @@ static int __stop_trace(int fd)
 	return ioctl(fd, BLKTRACETEARDOWN);
 }
 
-static int write_data(char *buf, int len)
-{
-	int ret;
-
-rewrite:
-	ret = fwrite(buf, len, 1, pfp);
-	if (ferror(pfp) || ret != 1) {
-		if (errno == EINTR) {
-			clearerr(pfp);
-			goto rewrite;
-		}
-
-		if (!piped_output || (errno != EPIPE && errno != EBADF)) {
-			fprintf(stderr, "write(%d) failed: %d/%s\n",
-				len, errno, strerror(errno));
-		}
-		goto err;
-	}
-
-	fflush(pfp);
-	return 0;
-
-err:
-	clearerr(pfp);
-	return 1;
-}
+// static int write_data(char *buf, int len)
+// {
+// 	int ret;
+// 
+// rewrite:
+// 	ret = fwrite(buf, len, 1, pfp);
+// 	if (ferror(pfp) || ret != 1) {
+// 		if (errno == EINTR) {
+// 			clearerr(pfp);
+// 			goto rewrite;
+// 		}
+// 
+// 		if (!piped_output || (errno != EPIPE && errno != EBADF)) {
+// 			fprintf(stderr, "write(%d) failed: %d/%s\n",
+// 				len, errno, strerror(errno));
+// 		}
+// 		goto err;
+// 	}
+// 
+// 	fflush(pfp);
+// 	return 0;
+// 
+// err:
+// 	clearerr(pfp);
+// 	return 1;
+// }
 
 /*
  * Returns the number of bytes read (successfully)
@@ -2669,23 +2671,20 @@ static int run_tracers(void)
 }
 
 void error (char *msg){
-perror(msg);
-exit(1);
+	perror(msg);
+	exit(1);
 }
 
-void writeToClient(struct blk_io_trace * t){
-int n;
-char buf[BUFSIZE];
-//printf("connfd: %d\n", connfd);
-//itoa(t->pid, buf, 10);
-snprintf(buf, sizeof(buf), "%d",t->pid);
-
-printf("itoa: %s\n", buf);
-n=write (connfd, buf, strlen(buf));
-bzero(buf,BUFSIZE);
-if(n<0)
-	printf("Error writing to socket\n");
-printf("%d\n", t->pid);
+static char *serial_buffer;
+void writeToClient(struct blk_io_trace * t){	
+	if (serial_buffer == NULL) 
+		serial_buffer = malloc(SE_BUFFER_SIZE);
+		
+  	serializeIOTrace(t, serial_buffer);
+  	int n = write (connfd, t, SE_BUFFER_SIZE);
+    
+	if(n<0)
+		printf("Error writing to socket: %d\n",n);
 }
 
 int main(int argc, char *argv[])
@@ -2698,10 +2697,8 @@ int listenfd; /* listening socket */
   struct sockaddr_in serveraddr; /* server's addr */
   struct sockaddr_in clientaddr; /* client addr */
   struct hostent *hostp; /* client host info */
-  char buf[BUFSIZE]; /* message buffer */
   char *hostaddrp; /* dotted decimal host addr string */
   int optval; /* flag value for setsockopt */
-  int n; /* message byte size */
 
   /* check command line args */
 /*  if (argc != 2) {
@@ -2745,7 +2742,7 @@ int listenfd; /* listening socket */
   while (1) {
 
     /* accept: wait for a connection request */
-    connfd = accept(listenfd, (struct sockaddr *) &clientaddr, &clientlen);
+    connfd = accept(listenfd, (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen);
     if (connfd < 0) 
       error("ERROR on accept");
     

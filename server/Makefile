@@ -1,7 +1,7 @@
 CC	= gcc
 CFLAGS	= -Wall -O2 -g -W
 ALL_CFLAGS = $(CFLAGS) -D_GNU_SOURCE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
-PROGS	= blkparse blktrace verify_blkparse blkrawverify blkiomon
+PROGS	= blkparse blktrace verify_blkparse blkrawverify blkiomon 
 LIBS	= -lpthread
 SCRIPTS	= btrace
 
@@ -28,7 +28,7 @@ btreplay/btreplay:
 blkparse: blkparse.o blkparse_fmt.o rbtree.o act_mask.o
 	$(CC) $(ALL_CFLAGS) -o $@ $(filter %.o,$^)
 
-blktrace: blktrace.o act_mask.o
+blktrace: serialization.o blktrace.o act_mask.o
 	$(CC) $(ALL_CFLAGS) -o $@ $(filter %.o,$^) $(LIBS)
 
 verify_blkparse: verify_blkparse.o
