@@ -32,7 +32,7 @@
 #include <string.h>
 #include "blktrace_api.h"
 
-#define SE_BUFFER_SIZE 48
+#define SE_STRUCT_SIZE 48
 
 typedef struct blk_io_trace IOTrace;
 

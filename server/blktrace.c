@@ -2678,13 +2678,15 @@ void error (char *msg){
 static char *serial_buffer;
 void writeToClient(struct blk_io_trace * t){	
 	if (serial_buffer == NULL) 
-		serial_buffer = malloc(SE_BUFFER_SIZE);
+		serial_buffer = malloc(SE_STRUCT_SIZE);
 		
   	serializeIOTrace(t, serial_buffer);
-  	int n = write (connfd, t, SE_BUFFER_SIZE);
+  	int n = write (connfd, t, SE_STRUCT_SIZE);
     
-	if(n<0)
+	if(n<0) {
 		printf("Error writing to socket: %d\n",n);
+		exit(-1);
+	}
 }
 
 int main(int argc, char *argv[])
