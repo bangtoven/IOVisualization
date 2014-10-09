@@ -1426,25 +1426,25 @@ static inline void account_requeue(struct blk_io_trace *t,
 static void log_complete(struct per_dev_info *pdi, struct per_cpu_info *pci,
 			 struct blk_io_trace *t, char *act)
 {
-	process_fmt(act, pci, t, log_track_complete(pdi, t), 0, NULL);
+	process_fmt(act, pci, t, log_track_complete(pdi, t), 0, NULL, m_socket);
 }
 
 static void log_insert(struct per_dev_info *pdi, struct per_cpu_info *pci,
 		       struct blk_io_trace *t, char *act)
 {
-	process_fmt(act, pci, t, log_track_insert(pdi, t), 0, NULL);
+	process_fmt(act, pci, t, log_track_insert(pdi, t), 0, NULL, m_socket);
 }
 
 static void log_queue(struct per_cpu_info *pci, struct blk_io_trace *t,
 		      char *act)
 {
-	process_fmt(act, pci, t, -1, 0, NULL);
+	process_fmt(act, pci, t, -1, 0, NULL, m_socket);
 }
 
 static void log_issue(struct per_dev_info *pdi, struct per_cpu_info *pci,
 		      struct blk_io_trace *t, char *act)
 {
-	process_fmt(act, pci, t, log_track_issue(pdi, t), 0, NULL);
+	process_fmt(act, pci, t, log_track_issue(pdi, t), 0, NULL, m_socket);
 }
 
 static void log_merge(struct per_dev_info *pdi, struct per_cpu_info *pci,
@@ -1453,38 +1453,38 @@ static void log_merge(struct per_dev_info *pdi, struct per_cpu_info *pci,
 	if (act[0] == 'F')
 		log_track_frontmerge(pdi, t);
 
-	process_fmt(act, pci, t, -1ULL, 0, NULL);
+	process_fmt(act, pci, t, -1ULL, 0, NULL, m_socket);
 }
 
 static void log_action(struct per_cpu_info *pci, struct blk_io_trace *t,
 			char *act)
 {
-	process_fmt(act, pci, t, -1ULL, 0, NULL);
+	process_fmt(act, pci, t, -1ULL, 0, NULL, m_socket);
 }
 
 static void log_generic(struct per_cpu_info *pci, struct blk_io_trace *t,
 			char *act)
 {
-	process_fmt(act, pci, t, -1ULL, 0, NULL);
+	process_fmt(act, pci, t, -1ULL, 0, NULL, m_socket);
 }
 
 static void log_unplug(struct per_cpu_info *pci, struct blk_io_trace *t,
 		      char *act)
 {
-	process_fmt(act, pci, t, -1ULL, 0, NULL);
+	process_fmt(act, pci, t, -1ULL, 0, NULL, m_socket);
 }
 
 static void log_split(struct per_cpu_info *pci, struct blk_io_trace *t,
 		      char *act)
 {
-	process_fmt(act, pci, t, -1ULL, 0, NULL);
+	process_fmt(act, pci, t, -1ULL, 0, NULL, m_socket);
 }
 
 static void log_pc(struct per_cpu_info *pci, struct blk_io_trace *t, char *act)
 {
 	unsigned char *buf = (unsigned char *) t + sizeof(*t);
 
-	process_fmt(act, pci, t, -1ULL, t->pdu_len, buf);
+	process_fmt(act, pci, t, -1ULL, t->pdu_len, buf, m_socket);
 }
 
 static void dump_trace_pc(struct blk_io_trace *t, struct per_dev_info *pdi,
@@ -2777,12 +2777,16 @@ static void usage(char *prog)
 	fprintf(stderr, "Usage: %s %s", prog, usage_str);
 }
 
+static SOCKET m_socket;
+
 int main(int argc, char *argv[])
 {
 	int i, c, ret, mode;
 	int act_mask_tmp = 0;
 	char *ofp_buffer = NULL;
 	char *bin_ofp_buffer = NULL;
+
+	m_socket = // TODO!;
 
 	while ((c = getopt_long(argc, argv, S_OPTS, l_opts, NULL)) != -1) {
 		switch (c) {
