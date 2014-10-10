@@ -2680,7 +2680,7 @@ void writeToClient(struct blk_io_trace * t){
 	if (serial_buffer == NULL) 
 		serial_buffer = malloc(SE_STRUCT_SIZE);
 		
-  	serializeIOTrace(t, serial_buffer);
+  	serializeIOTrace(t, serial_buffer); // t의 내용이 소켓통신 가능한 byte stream으로 serialize 되서 buffer에 저장됨.
   	int n = write (connfd, t, SE_STRUCT_SIZE);
     
 	if(n<0) {
