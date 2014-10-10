@@ -287,7 +287,7 @@ static char *parse_field(char *act, struct per_cpu_info *pci,
 
 static void process_default(char *act, struct per_cpu_info *pci,
 			    struct blk_io_trace *t, unsigned long long elapsed,
-			    int pdu_len, unsigned char *pdu_buf, SOCKET socket)
+			    int pdu_len, unsigned char *pdu_buf)
 {
 	struct blk_io_trace_remap r = { .device_from = 0, };
 	char rwbs[8];
@@ -431,12 +431,12 @@ static void process_default(char *act, struct per_cpu_info *pci,
 
 void process_fmt(char *act, struct per_cpu_info *pci, struct blk_io_trace *t,
 		 unsigned long long elapsed, int pdu_len,
-		 unsigned char *pdu_buf, SOCKET socket)
+		 unsigned char *pdu_buf)
 {
 	char *p = override_format[(int) *act];
 
 	if (!p) {
-		process_default(act, pci, t, elapsed, pdu_len, pdu_buf, socket);
+		process_default(act, pci, t, elapsed, pdu_len, pdu_buf);
 		return;
 	}
 
