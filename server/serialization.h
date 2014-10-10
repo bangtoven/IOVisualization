@@ -16,6 +16,7 @@
  - IOTrace* output : we will allocate only one memory space for structure. it must have been allocated by the caller.
  output
  - 0 if success (for error handling)
+This function is more memory-efficient.
 
  * deserializeIOTrace
  input
