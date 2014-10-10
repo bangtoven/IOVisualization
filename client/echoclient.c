@@ -76,7 +76,6 @@ int main(int argc, char **argv) {
 			
 			printf("seq:%u\t", t.sequence);
 			printf("pid:%8u\t", t.pid);
-			printf("action:%u\t", t.action);
 			printf("bytes:%8u\t", t.bytes);
 			printf("sector:%llu\t", (unsigned long long) t.sector);
 			printf("\n");
