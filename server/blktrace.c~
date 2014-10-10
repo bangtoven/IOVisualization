@@ -1389,7 +1389,7 @@ static int handle_list_file(struct tracer_devpath_head *hd,
 			t = (struct blk_io_trace *)(tbp->buf + off);
 			t_len = sizeof(*t) + t->pdu_len;
             
-            printf ("OUTPUT: %d \t%d \t%ld \t%ld \n",t->pid,t->action,t->sector,t->time);
+            //printf ("OUTPUT: %d \t%d \t%ld \t%ld \n",t->pid,t->action,t->sector,t->time);
 writeToClient(t);
             
 			if (off + t_len > tbp->len)
@@ -2674,10 +2674,17 @@ exit(1);
 }
 
 void writeToClient(struct blk_io_trace * t){
-char buf;
-buf = 'c';
-write (connfd, buf, 1);
+int n;
+char buf[BUFSIZE];
+//printf("connfd: %d\n", connfd);
+//itoa(t->pid, buf, 10);
+snprintf(buf, sizeof(buf), "%d",t->pid);
 
+printf("itoa: %s\n", buf);
+n=write (connfd, buf, strlen(buf));
+if(n<0)
+	printf("Error writing to socket\n");
+printf("%d\n", t->pid);
 }
 
 int main(int argc, char *argv[])
