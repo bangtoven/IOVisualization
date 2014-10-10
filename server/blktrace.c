@@ -1381,6 +1381,9 @@ static int handle_list_file(struct tracer_devpath_head *hd,
 		while (off + (int)sizeof(*t) <= tbp->len) {
 			t = (struct blk_io_trace *)(tbp->buf + off);
 			t_len = sizeof(*t) + t->pdu_len;
+            
+            printf ("OUTPUT: %d \t%d \t%ld \t%ld \n",t->pid,t->action,t->sector,t->time);
+            
 			if (off + t_len > tbp->len)
 				break;
 
@@ -1395,7 +1398,7 @@ static int handle_list_file(struct tracer_devpath_head *hd,
 		 * for the next pass.
 		 */
 		if (off) {
-			if (write_data(tbp->buf, off) || off == tbp->len) {
+			if (off == tbp->len) {
 				free(tbp);
 				prev = NULL;
 			}
