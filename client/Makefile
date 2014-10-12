@@ -1,13 +1,13 @@
 CC=gcc
 CFLAGS=-c -Wall
 
-all: client
+all: echoclient
 
-client: echoclient.o
-	$(CC) echoclient.o ../server/serialization.o -o client
+echoclient: echoclient.o
+	$(CC) echoclient.o ../server/serialization.o -o echoclient
 
 echoclient.o: echoclient.c
 	$(CC) $(CFLAGS) echoclient.c 
 
 clean:
-	rm -rf *o client
+	rm -rf *o echoclient

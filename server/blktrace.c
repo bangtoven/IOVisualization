@@ -1,27 +1,27 @@
 /*
- * block queue tracing application
- *
- * Copyright (C) 2005 Jens Axboe <axboe@suse.de>
- * Copyright (C) 2006 Jens Axboe <axboe@kernel.dk>
- *
- * Rewrite to have a single thread per CPU (managing all devices on that CPU)
- *	Alan D. Brunelle <alan.brunelle@hp.com> - January 2009
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- */
+* block queue tracing application
+*
+* Copyright (C) 2005 Jens Axboe <axboe@suse.de>
+* Copyright (C) 2006 Jens Axboe <axboe@kernel.dk>
+*
+* Rewrite to have a single thread per CPU (managing all devices on that CPU)
+*	Alan D. Brunelle <alan.brunelle@hp.com> - January 2009
+*
+*  This program is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+*
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with this program; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+*/
 
 #include <errno.h>
 #include <stdarg.h>
@@ -56,9 +56,9 @@
 #include "serialization.h"
 
 /*
- * You may want to increase this even more, if you are logging at a high
- * rate and see skipped/missed events
- */
+* You may want to increase this even more, if you are logging at a high
+* rate and see skipped/missed events
+*/
 
 #define BUFSIZE 1024
 
@@ -87,11 +87,11 @@ enum thread_status {
 };
 
 /*
- * Generic stats collected: nevents can be _roughly_ estimated by data_read
- * (discounting pdu...)
- *
- * These fields are updated w/ pdc_dr_update & pdc_nev_update below.
- */
+* Generic stats collected: nevents can be _roughly_ estimated by data_read
+* (discounting pdu...)
+*
+* These fields are updated w/ pdc_dr_update & pdc_nev_update below.
+*/
 struct pdc_stats {
 	unsigned long long data_read;
 	unsigned long long nevents;
@@ -106,18 +106,18 @@ struct devpath {
 	unsigned long long drops;
 
 	/*
-	 * For piped output only:
-	 *
-	 * Each tracer will have a tracer_devpath_head that it will add new
-	 * data onto. It's list is protected above (tracer_devpath_head.mutex)
-	 * and it will signal the processing thread using the dp_cond,
-	 * dp_mutex & dp_entries variables above.
-	 */
+	* For piped output only:
+	*
+	* Each tracer will have a tracer_devpath_head that it will add new
+	* data onto. It's list is protected above (tracer_devpath_head.mutex)
+	* and it will signal the processing thread using the dp_cond,
+	* dp_mutex & dp_entries variables above.
+	*/
 	struct tracer_devpath_head *heads;
 
 	/*
-	 * For network server mode only:
-	 */
+	* For network server mode only:
+	*/
 	struct cl_host *ch;
 	u32 cl_id;
 	time_t cl_connect_time;
@@ -125,21 +125,21 @@ struct devpath {
 };
 
 /*
- * For piped output to stdout we will have each tracer thread (one per dev)
- * tack buffers read from the relay queues on a per-device list.
- *
- * The main thread will then collect trace buffers from each of lists in turn.
- *
- * We will use a mutex to guard each of the trace_buf list. The tracers
- * can then signal the main thread using <dp_cond,dp_mutex> and
- * dp_entries. (When dp_entries is 0, and a tracer adds an entry it will
- * signal. When dp_entries is 0, the main thread will wait for that condition
- * to be signalled.)
- *
- * adb: It may be better just to have a large buffer per tracer per dev,
- * and then use it as a ring-buffer. This would certainly cut down a lot
- * of malloc/free thrashing, at the cost of more memory movements (potentially).
- */
+* For piped output to stdout we will have each tracer thread (one per dev)
+* tack buffers read from the relay queues on a per-device list.
+*
+* The main thread will then collect trace buffers from each of lists in turn.
+*
+* We will use a mutex to guard each of the trace_buf list. The tracers
+* can then signal the main thread using <dp_cond,dp_mutex> and
+* dp_entries. (When dp_entries is 0, and a tracer adds an entry it will
+* signal. When dp_entries is 0, the main thread will wait for that condition
+* to be signalled.)
+*
+* adb: It may be better just to have a large buffer per tracer per dev,
+* and then use it as a ring-buffer. This would certainly cut down a lot
+* of malloc/free thrashing, at the cost of more memory movements (potentially).
+*/
 struct trace_buf {
 	struct list_head head;
 	struct devpath *dpp;
@@ -154,8 +154,8 @@ struct tracer_devpath_head {
 };
 
 /*
- * Used to handle the mmap() interfaces for output file (containing traces)
- */
+* Used to handle the mmap() interfaces for output file (containing traces)
+*/
 struct mmap_info {
 	void *fs_buf;
 	unsigned long long fs_size, fs_max_size, fs_off, fs_buf_len;
@@ -164,11 +164,11 @@ struct mmap_info {
 };
 
 /*
- * Each thread doing work on a (client) side of blktrace will have one
- * of these. The ios array contains input/output information, pfds holds
- * poll() data. The volatile's provide flags to/from the main executing
- * thread.
- */
+* Each thread doing work on a (client) side of blktrace will have one
+* of these. The ios array contains input/output information, pfds holds
+* poll() data. The volatile's provide flags to/from the main executing
+* thread.
+*/
 struct tracer {
 	struct list_head head;
 	struct io_info *ios;
@@ -179,15 +179,15 @@ struct tracer {
 };
 
 /*
- * networking stuff follows. we include a magic number so we know whether
- * to endianness convert or not.
- *
- * The len field is overloaded:
- *	0 - Indicates an "open" - allowing the server to set up for a dev/cpu
- *	1 - Indicates a "close" - Shut down connection orderly
- *
- * The cpu field is overloaded on close: it will contain the number of drops.
- */
+* networking stuff follows. we include a magic number so we know whether
+* to endianness convert or not.
+*
+* The len field is overloaded:
+*	0 - Indicates an "open" - allowing the server to set up for a dev/cpu
+*	1 - Indicates a "close" - Shut down connection orderly
+*
+* The cpu field is overloaded on close: it will contain the number of drops.
+*/
 struct blktrace_net_hdr {
 	u32 magic;		/* same as trace magic */
 	char buts_name[32];	/* trace name */
@@ -201,11 +201,11 @@ struct blktrace_net_hdr {
 };
 
 /*
- * Each host encountered has one of these. The head is used to link this
- * on to the network server's ch_list. Connections associated with this
- * host are linked on conn_list, and any devices traced on that host
- * are connected on the devpaths list.
- */
+* Each host encountered has one of these. The head is used to link this
+* on to the network server's ch_list. Connections associated with this
+* host are linked on conn_list, and any devices traced on that host
+* are connected on the devpaths list.
+*/
 struct cl_host {
 	struct list_head head;
 	struct list_head conn_list;
@@ -217,10 +217,10 @@ struct cl_host {
 };
 
 /*
- * Each connection (client to server socket ('fd')) has one of these. A
- * back reference to the host ('ch'), and lists headers (for the host
- * list, and the network server conn_list) are also included.
- */
+* Each connection (client to server socket ('fd')) has one of these. A
+* back reference to the host ('ch'), and lists headers (for the host
+* list, and the network server conn_list) are also included.
+*/
 struct cl_conn {
 	struct list_head ch_head, ns_head;
 	struct cl_host *ch;
@@ -229,11 +229,11 @@ struct cl_conn {
 };
 
 /*
- * The network server requires some poll structures to be maintained -
- * one per conection currently on conn_list. The nchs/ch_list values
- * are for each host connected to this server. The addr field is used
- * for scratch as new connections are established.
- */
+* The network server requires some poll structures to be maintained -
+* one per conection currently on conn_list. The nchs/ch_list values
+* are for each host connected to this server. The addr field is used
+* for scratch as new connections are established.
+*/
 struct net_server_s {
 	struct list_head conn_list;
 	struct list_head ch_list;
@@ -243,13 +243,13 @@ struct net_server_s {
 };
 
 /*
- * This structure is (generically) used to providide information
- * for a read-to-write set of values.
- *
- * ifn & ifd represent input information
- *
- * ofn, ofd, ofp, obuf & mmap_info are used for output file (optionally).
- */
+* This structure is (generically) used to providide information
+* for a read-to-write set of values.
+*
+* ifn & ifd represent input information
+*
+* ofn, ofd, ofp, obuf & mmap_info are used for output file (optionally).
+*/
 struct io_info {
 	struct devpath *dpp;
 	FILE *ofp;
@@ -257,19 +257,19 @@ struct io_info {
 	struct cl_conn *nc;	/* Server network connection */
 
 	/*
-	 * mmap controlled output files
-	 */
+	* mmap controlled output files
+	*/
 	struct mmap_info mmap_info;
 
 	/*
-	 * Client network fields
-	 */
+	* Client network fields
+	*/
 	unsigned int ready;
 	unsigned long long data_queued;
 
 	/*
-	 * Input/output file descriptors & names
-	 */
+	* Input/output file descriptors & names
+	*/
 	int ifd, ofd;
 	char ifn[MAXPATHLEN + 64];
 	char ofn[MAXPATHLEN + 64];
@@ -278,8 +278,8 @@ struct io_info {
 static char blktrace_version[] = "2.0.0";
 
 /*
- * Linkage to blktrace helper routines (trace conversions)
- */
+* Linkage to blktrace helper routines (trace conversions)
+*/
 int data_is_native = -1;
 
 static int ndevs;
@@ -305,16 +305,16 @@ static LIST_HEAD(tracers);
 static volatile int done;
 
 /*
- * tracer threads add entries, the main thread takes them off and processes
- * them. These protect the dp_entries variable.
- */
+* tracer threads add entries, the main thread takes them off and processes
+* them. These protect the dp_entries variable.
+*/
 static pthread_cond_t dp_cond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t dp_mutex = PTHREAD_MUTEX_INITIALIZER;
 static volatile int dp_entries;
 
 /*
- * These synchronize master / thread interactions.
- */
+* These synchronize master / thread interactions.
+*/
 static pthread_cond_t mt_cond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t mt_mutex = PTHREAD_MUTEX_INITIALIZER;
 static volatile int nthreads_running;
@@ -323,8 +323,8 @@ static volatile int nthreads_error;
 static volatile int tracers_run;
 
 /*
- * network cmd line params
- */
+* network cmd line params
+*/
 static struct sockaddr_in hostname_addr;
 static char hostname[MAXHOSTNAMELEN];
 static int net_port = TRACE_NET_PORT;
@@ -446,38 +446,38 @@ static struct option l_opts[] = {
 
 static char usage_str[] = "\n\n" \
 	"-d <dev>             | --dev=<dev>\n" \
-        "[ -r <debugfs path>  | --relay=<debugfs path> ]\n" \
-        "[ -o <file>          | --output=<file>]\n" \
-        "[ -D <dir>           | --output-dir=<dir>\n" \
-        "[ -w <time>          | --stopwatch=<time>]\n" \
-        "[ -a <action field>  | --act-mask=<action field>]\n" \
-        "[ -A <action mask>   | --set-mask=<action mask>]\n" \
-        "[ -b <size>          | --buffer-size]\n" \
-        "[ -n <number>        | --num-sub-buffers=<number>]\n" \
-        "[ -l                 | --listen]\n" \
-        "[ -h <hostname>      | --host=<hostname>]\n" \
-        "[ -p <port number>   | --port=<port number>]\n" \
-        "[ -s                 | --no-sendfile]\n" \
-        "[ -I <devs file>     | --input-devs=<devs file>]\n" \
-        "[ -v <version>       | --version]\n" \
-        "[ -V <version>       | --version]\n" \
+		"[ -r <debugfs path>  | --relay=<debugfs path> ]\n" \
+			"[ -o <file>          | --output=<file>]\n" \
+				"[ -D <dir>           | --output-dir=<dir>\n" \
+					"[ -w <time>          | --stopwatch=<time>]\n" \
+						"[ -a <action field>  | --act-mask=<action field>]\n" \
+							"[ -A <action mask>   | --set-mask=<action mask>]\n" \
+								"[ -b <size>          | --buffer-size]\n" \
+									"[ -n <number>        | --num-sub-buffers=<number>]\n" \
+										"[ -l                 | --listen]\n" \
+											"[ -h <hostname>      | --host=<hostname>]\n" \
+												"[ -p <port number>   | --port=<port number>]\n" \
+													"[ -s                 | --no-sendfile]\n" \
+														"[ -I <devs file>     | --input-devs=<devs file>]\n" \
+															"[ -v <version>       | --version]\n" \
+																"[ -V <version>       | --version]\n" \
 
-	"\t-d Use specified device. May also be given last after options\n" \
-	"\t-r Path to mounted debugfs, defaults to /sys/kernel/debug\n" \
-	"\t-o File(s) to send output to\n" \
-	"\t-D Directory to prepend to output file names\n" \
-	"\t-w Stop after defined time, in seconds\n" \
-	"\t-a Only trace specified actions. See documentation\n" \
-	"\t-A Give trace mask as a single value. See documentation\n" \
-	"\t-b Sub buffer size in KiB (default 512)\n" \
-	"\t-n Number of sub buffers (default 4)\n" \
-	"\t-l Run in network listen mode (blktrace server)\n" \
-	"\t-h Run in network client mode, connecting to the given host\n" \
-	"\t-p Network port to use (default 8462)\n" \
-	"\t-s Make the network client NOT use sendfile() to transfer data\n" \
-	"\t-I Add devices found in <devs file>\n" \
-	"\t-v Print program version info\n" \
-	"\t-V Print program version info\n\n";
+																	"\t-d Use specified device. May also be given last after options\n" \
+																		"\t-r Path to mounted debugfs, defaults to /sys/kernel/debug\n" \
+																			"\t-o File(s) to send output to\n" \
+																				"\t-D Directory to prepend to output file names\n" \
+																					"\t-w Stop after defined time, in seconds\n" \
+																						"\t-a Only trace specified actions. See documentation\n" \
+																							"\t-A Give trace mask as a single value. See documentation\n" \
+																								"\t-b Sub buffer size in KiB (default 512)\n" \
+																									"\t-n Number of sub buffers (default 4)\n" \
+																										"\t-l Run in network listen mode (blktrace server)\n" \
+																											"\t-h Run in network client mode, connecting to the given host\n" \
+																												"\t-p Network port to use (default 8462)\n" \
+																													"\t-s Make the network client NOT use sendfile() to transfer data\n" \
+																														"\t-I Add devices found in <devs file>\n" \
+																															"\t-v Print program version info\n" \
+																																"\t-V Print program version info\n\n";
 
 static void clear_events(struct pollfd *pfd)
 {
@@ -521,8 +521,8 @@ static void show_usage(char *prog)
 }
 
 /*
- * Create a timespec 'msec' milliseconds into the future
- */
+* Create a timespec 'msec' milliseconds into the future
+*/
 static inline void make_timespec(struct timespec *tsp, long delta_msec)
 {
 	struct timeval now;
@@ -541,8 +541,8 @@ static inline void make_timespec(struct timespec *tsp, long delta_msec)
 }
 
 /*
- * Add a timer to ensure wait ends
- */
+* Add a timer to ensure wait ends
+*/
 static void t_pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
 	struct timespec ts;
@@ -568,8 +568,8 @@ static void tracer_wait_unblock(struct tracer *tp)
 }
 
 static void tracer_signal_ready(struct tracer *tp,
-				enum thread_status th_status,
-				int status)
+enum thread_status th_status,
+int status)
 {
 	pthread_mutex_lock(&mt_mutex);
 	tp->status = status;
@@ -725,7 +725,7 @@ static int my_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 }
 
 static void *my_mmap(void *addr, size_t length, int prot, int flags, int fd,
-		     off_t offset)
+off_t offset)
 {
 	void *new;
 
@@ -737,7 +737,7 @@ static void *my_mmap(void *addr, size_t length, int prot, int flags, int fd,
 }
 
 static int my_mlock(struct tracer *tp,
-		    const void *addr, size_t len)
+const void *addr, size_t len)
 {
 	int ret, retry = 0;
 
@@ -752,8 +752,8 @@ static int my_mlock(struct tracer *tp,
 }
 
 static int setup_mmap(int fd, unsigned int maxlen,
-		      struct mmap_info *mip,
-		      struct tracer *tp)
+struct mmap_info *mip,
+struct tracer *tp)
 {
 	if (mip->fs_off + maxlen > mip->fs_buf_len) {
 		unsigned long nr = max(16, mip->buf_nr);
@@ -774,8 +774,8 @@ static int setup_mmap(int fd, unsigned int maxlen,
 		}
 
 		mip->fs_buf = my_mmap(NULL, mip->fs_buf_len, PROT_WRITE,
-				      MAP_SHARED, fd,
-				      mip->fs_size - mip->fs_off);
+		MAP_SHARED, fd,
+		mip->fs_size - mip->fs_off);
 		if (mip->fs_buf == MAP_FAILED) {
 			perror("setup_mmap: mmap");
 			return 1;
@@ -792,8 +792,8 @@ static int setup_mmap(int fd, unsigned int maxlen,
 static int __stop_trace(int fd)
 {
 	/*
-	 * Should be stopped, don't complain if it isn't
-	 */
+	* Should be stopped, don't complain if it isn't
+	*/
 	ioctl(fd, BLKTRACESTOP);
 	return ioctl(fd, BLKTRACETEARDOWN);
 }
@@ -826,8 +826,8 @@ static int __stop_trace(int fd)
 // }
 
 /*
- * Returns the number of bytes read (successfully)
- */
+* Returns the number of bytes read (successfully)
+*/
 static int __net_recv_data(int fd, void *buf, unsigned int len)
 {
 	unsigned int bytes_left = len;
@@ -859,8 +859,8 @@ static int net_recv_data(int fd, void *buf, unsigned int len)
 }
 
 /*
- * Returns number of bytes written
- */
+* Returns number of bytes written
+*/
 static int net_send_data(int fd, void *buf, unsigned int buf_len)
 {
 	int ret;
@@ -917,11 +917,11 @@ static void net_send_open(int fd, int cpu, char *buts_name)
 static void net_send_close(int fd, char *buts_name, int drops)
 {
 	/*
-	 * Overload CPU w/ number of drops
-	 *
-	 * XXX: Need to clear/set done around call - done=1 (which
-	 * is true here) stops reads from happening... :-(
-	 */
+	* Overload CPU w/ number of drops
+	*
+	* XXX: Need to clear/set done around call - done=1 (which
+	* is true here) stops reads from happening... :-(
+	*/
 	done = 0;
 	net_send_open_close(fd, drops, buts_name, 1);
 	done = 1;
@@ -944,11 +944,11 @@ static void net_send_drops(int fd)
 }
 
 /*
- * Returns:
- *	 0: "EOF"
- *	 1: OK
- *	-1: Error
- */
+* Returns:
+*	 0: "EOF"
+*	 1: OK
+*	-1: Error
+*/
 static int net_get_header(struct cl_conn *nc, struct blktrace_net_hdr *bnh)
 {
 	int bytes_read;
@@ -976,7 +976,7 @@ static int net_setup_addr(void)
 
 	if (inet_aton(hostname, &addr->sin_addr) != 1) {
 		struct hostent *hent;
-retry:
+		retry:
 		hent = gethostbyname(hostname);
 		if (!hent) {
 			if (h_errno == TRY_AGAIN) {
@@ -985,13 +985,13 @@ retry:
 			} else if (h_errno == NO_RECOVERY) {
 				fprintf(stderr, "gethostbyname(%s)"
 					"non-recoverable error encountered\n",
-					hostname);
+				hostname);
 			} else {
 				/*
-				 * HOST_NOT_FOUND, NO_ADDRESS or NO_DATA
-				 */
+				* HOST_NOT_FOUND, NO_ADDRESS or NO_DATA
+				*/
 				fprintf(stderr, "Host %s not found\n",
-					hostname);
+				hostname);
 			}
 			return 1;
 		}
@@ -1019,9 +1019,9 @@ static int net_setup_client(void)
 	if (connect(fd, (struct sockaddr *)addr, sizeof(*addr)) < 0) {
 		if (errno == ECONNREFUSED)
 			fprintf(stderr,
-				"\nclient: Connection to %s refused, "
-				"perhaps the server is not started?\n\n",
-				hostname);
+		"\nclient: Connection to %s refused, "
+			"perhaps the server is not started?\n\n",
+		hostname);
 		else
 			perror("client: connect");
 
@@ -1044,7 +1044,7 @@ static int open_client_connections(void)
 	}
 	return 0;
 
-err:
+	err:
 	while (cpu > 0)
 		close(cl_fds[cpu--]);
 	free(cl_fds);
@@ -1088,7 +1088,7 @@ static void setup_buts(void)
 			memset(dpp->stats, 0, dpp->ncpus * sizeof(*dpp->stats));
 		} else
 			fprintf(stderr, "BLKTRACESETUP(2) %s failed: %d/%s\n",
-				dpp->path, errno, strerror(errno));
+		dpp->path, errno, strerror(errno));
 	}
 }
 
@@ -1101,7 +1101,7 @@ static void start_buts(void)
 
 		if (ioctl(dpp->fd, BLKTRACESTART) < 0) {
 			fprintf(stderr, "BLKTRACESTART %s failed: %d/%s\n",
-				dpp->path, errno, strerror(errno));
+			dpp->path, errno, strerror(errno));
 		}
 	}
 }
@@ -1112,21 +1112,21 @@ static int get_drops(struct devpath *dpp)
 	char fn[MAXPATHLEN + 64], tmp[256];
 
 	snprintf(fn, sizeof(fn), "%s/block/%s/dropped", debugfs_path,
-		 dpp->buts_name);
+	dpp->buts_name);
 
 	fd = my_open(fn, O_RDONLY);
 	if (fd < 0) {
 		/*
-		 * This may be ok: the kernel may not support
-		 * dropped counts.
-		 */
+		* This may be ok: the kernel may not support
+		* dropped counts.
+		*/
 		if (errno != ENOENT)
 			fprintf(stderr, "Could not open %s: %d/%s\n",
-				fn, errno, strerror(errno));
+		fn, errno, strerror(errno));
 		return 0;
 	} else if (read(fd, tmp, sizeof(tmp)) < 0) {
 		fprintf(stderr, "Could not read %s: %d/%s\n",
-			fn, errno, strerror(errno));
+		fn, errno, strerror(errno));
 	} else
 		drops = atoi(tmp);
 	close(fd);
@@ -1198,7 +1198,7 @@ static int setup_tracer_devpaths(void)
 }
 
 static inline void add_trace_buf(struct devpath *dpp, int cpu,
-						struct trace_buf **tbpp)
+struct trace_buf **tbpp)
 {
 	struct trace_buf *tbp = *tbpp;
 	struct tracer_devpath_head *hd = &dpp->heads[cpu];
@@ -1245,20 +1245,20 @@ static int add_devpath(char *path)
 	struct list_head *p;
 
 	/*
-	 * Verify device is not duplicated
-	 */
+	* Verify device is not duplicated
+	*/
 	__list_for_each(p, &devpaths) {
-	       struct devpath *tmp = list_entry(p, struct devpath, head);
-	       if (!strcmp(tmp->path, path))
-		        return 0;
+		struct devpath *tmp = list_entry(p, struct devpath, head);
+		if (!strcmp(tmp->path, path))
+			return 0;
 	}
 	/*
-	 * Verify device is valid before going too far
-	 */
+	* Verify device is valid before going too far
+	*/
 	fd = my_open(path, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		fprintf(stderr, "Invalid path %s specified: %d/%s\n",
-			path, errno, strerror(errno));
+		path, errno, strerror(errno));
 		return 1;
 	}
 
@@ -1305,8 +1305,8 @@ static int flush_subbuf_net(struct trace_buf *tbp)
 }
 
 static int
-handle_list_net(__attribute__((__unused__))struct tracer_devpath_head *hd,
-		struct list_head *list)
+	handle_list_net(__attribute__((__unused__))struct tracer_devpath_head *hd,
+struct list_head *list)
 {
 	struct trace_buf *tbp;
 	struct list_head *p, *q;
@@ -1332,22 +1332,22 @@ handle_list_net(__attribute__((__unused__))struct tracer_devpath_head *hd,
 }
 
 /*
- * Tack 'tbp's buf onto the tail of 'prev's buf
- */
+* Tack 'tbp's buf onto the tail of 'prev's buf
+*/
 static struct trace_buf *tb_combine(struct trace_buf *prev,
-				    struct trace_buf *tbp)
+struct trace_buf *tbp)
 {
 	unsigned long tot_len;
 
 	tot_len = prev->len + tbp->len;
 	if (tot_len > buf_size) {
 		/*
-		 * tbp->head isn't connected (it was 'prev'
-		 * so it had been taken off of the list
-		 * before). Therefore, we can realloc
-		 * the whole structures, as the other fields
-		 * are "static".
-		 */
+		* tbp->head isn't connected (it was 'prev'
+		* so it had been taken off of the list
+		* before). Therefore, we can realloc
+		* the whole structures, as the other fields
+		* are "static".
+		*/
 		prev = realloc(prev, sizeof(*prev) + tot_len);
 		prev->buf = (void *)(prev + 1);
 	}
@@ -1360,7 +1360,7 @@ static struct trace_buf *tb_combine(struct trace_buf *prev,
 }
 
 static int handle_list_file(struct tracer_devpath_head *hd,
-			    struct list_head *list)
+struct list_head *list)
 {
 	int off, t_len, nevents;
 	struct blk_io_trace *t;
@@ -1375,24 +1375,24 @@ static int handle_list_file(struct tracer_devpath_head *hd,
 		entries_handled++;
 
 		/*
-		 * If there was some leftover before, tack this new
-		 * entry onto the tail of the previous one.
-		 */
+		* If there was some leftover before, tack this new
+		* entry onto the tail of the previous one.
+		*/
 		if (prev)
 			tbp = tb_combine(prev, tbp);
 
 		/*
-		 * See how many whole traces there are - send them
-		 * all out in one go.
-		 */
+		* See how many whole traces there are - send them
+		* all out in one go.
+		*/
 		off = 0;
 		nevents = 0;
 		while (off + (int)sizeof(*t) <= tbp->len) {
 			t = (struct blk_io_trace *)(tbp->buf + off);
 			t_len = sizeof(*t) + t->pdu_len;
             
-            //printf ("OUTPUT: %d \t%d \t%ld \t%ld \n",t->pid,t->action,t->sector,t->time);
-writeToClient(t);
+			//printf ("OUTPUT: %d \t%d \t%ld \t%ld \n",t->pid,t->action,t->sector,t->time);
+			writeToClient(t);
             
 			if (off + t_len > tbp->len)
 				break;
@@ -1404,9 +1404,9 @@ writeToClient(t);
 			pdc_nev_update(tbp->dpp, tbp->cpu, nevents);
 
 		/*
-		 * Write any full set of traces, any remaining data is kept
-		 * for the next pass.
-		 */
+		* Write any full set of traces, any remaining data is kept
+		* for the next pass.
+		*/
 		if (off) {
 			if (off == tbp->len) {
 				free(tbp);
@@ -1414,8 +1414,8 @@ writeToClient(t);
 			}
 			else {
 				/*
-				 * Move valid data to beginning of buffer
-				 */
+				* Move valid data to beginning of buffer
+				*/
 				tbp->len -= off;
 				memmove(tbp->buf, tbp->buf + off, tbp->len);
 				prev = tbp;
@@ -1466,9 +1466,9 @@ static void process_trace_bufs(void)
 static void clean_trace_bufs(void)
 {
 	/*
-	 * No mutex needed here: we're only reading from the lists,
-	 * tracers are done
-	 */
+	* No mutex needed here: we're only reading from the lists,
+	* tracers are done
+	*/
 	while (dp_entries)
 		__process_trace_bufs();
 }
@@ -1477,7 +1477,7 @@ static inline void read_err(int cpu, char *ifn)
 {
 	if (errno != EAGAIN)
 		fprintf(stderr, "Thread %d failed read of %s: %d/%s\n",
-			cpu, ifn, errno, strerror(errno));
+	cpu, ifn, errno, strerror(errno));
 }
 
 static int net_sendfile(struct io_info *iop)
@@ -1490,7 +1490,7 @@ static int net_sendfile(struct io_info *iop)
 		return 1;
 	} else if (ret < (int)iop->ready) {
 		fprintf(stderr, "short sendfile send (%d of %d)\n",
-			ret, iop->ready);
+		ret, iop->ready);
 		return 1;
 	}
 
@@ -1522,35 +1522,35 @@ static int fill_ofname(struct io_info *iop, int cpu)
 
 		len += sprintf(dst + len, "%s-", nc->ch->hostname);
 		len += strftime(dst + len, 64, "%F-%T/",
-				gmtime(&iop->dpp->cl_connect_time));
+		gmtime(&iop->dpp->cl_connect_time));
 	}
 
 	if (stat(iop->ofn, &sb) < 0) {
 		if (errno != ENOENT) {
 			fprintf(stderr,
-				"Destination dir %s stat failed: %d/%s\n",
-				iop->ofn, errno, strerror(errno));
+			"Destination dir %s stat failed: %d/%s\n",
+			iop->ofn, errno, strerror(errno));
 			return 1;
 		}
 		/*
-		 * There is no synchronization between multiple threads
-		 * trying to create the directory at once.  It's harmless
-		 * to let them try, so just detect the problem and move on.
-		 */
+		* There is no synchronization between multiple threads
+		* trying to create the directory at once.  It's harmless
+		* to let them try, so just detect the problem and move on.
+		*/
 		if (mkdir(iop->ofn, 0755) < 0 && errno != EEXIST) {
 			fprintf(stderr,
-				"Destination dir %s can't be made: %d/%s\n",
-				iop->ofn, errno, strerror(errno));
+			"Destination dir %s can't be made: %d/%s\n",
+			iop->ofn, errno, strerror(errno));
 			return 1;
 		}
 	}
 
 	if (output_name)
 		snprintf(iop->ofn + len, sizeof(iop->ofn), "%s.blktrace.%d",
-			 output_name, cpu);
+	output_name, cpu);
 	else
 		snprintf(iop->ofn + len, sizeof(iop->ofn), "%s.blktrace.%d",
-			 iop->dpp->buts_name, cpu);
+	iop->dpp->buts_name, cpu);
 
 	return 0;
 }
@@ -1560,8 +1560,8 @@ static int set_vbuf(struct io_info *iop, int mode, size_t size)
 	iop->obuf = malloc(size);
 	if (setvbuf(iop->ofp, iop->obuf, mode, size) < 0) {
 		fprintf(stderr, "setvbuf(%s, %d) failed: %d/%s\n",
-			iop->dpp->path, (int)size, errno,
-			strerror(errno));
+		iop->dpp->path, (int)size, errno,
+		strerror(errno));
 		free(iop->obuf);
 		return 1;
 	}
@@ -1578,13 +1578,13 @@ static int iop_open(struct io_info *iop, int cpu)
 	iop->ofp = my_fopen(iop->ofn, "w+");
 	if (iop->ofp == NULL) {
 		fprintf(stderr, "Open output file %s failed: %d/%s\n",
-			iop->ofn, errno, strerror(errno));
+		iop->ofn, errno, strerror(errno));
 		return 1;
 	}
 
 	if (set_vbuf(iop, _IOLBF, FILE_VBUF_SIZE)) {
 		fprintf(stderr, "set_vbuf for file %s failed: %d/%s\n",
-			iop->ofn, errno, strerror(errno));
+		iop->ofn, errno, strerror(errno));
 		fclose(iop->ofp);
 		return 1;
 	}
@@ -1603,8 +1603,8 @@ static void close_iop(struct io_info *iop)
 	if (!piped_output) {
 		if (ftruncate(fileno(iop->ofp), mip->fs_size) < 0) {
 			fprintf(stderr,
-				"Ignoring err: ftruncate(%s): %d/%s\n",
-				iop->ofn, errno, strerror(errno));
+			"Ignoring err: ftruncate(%s): %d/%s\n",
+			iop->ofn, errno, strerror(errno));
 		}
 	}
 
@@ -1658,12 +1658,12 @@ static int open_ios(struct tracer *tp)
 		iop->dpp = dpp;
 		iop->ofd = -1;
 		snprintf(iop->ifn, sizeof(iop->ifn), "%s/block/%s/trace%d",
-			debugfs_path, dpp->buts_name, tp->cpu);
+		debugfs_path, dpp->buts_name, tp->cpu);
 
 		iop->ifd = my_open(iop->ifn, O_RDONLY | O_NONBLOCK);
 		if (iop->ifd < 0) {
 			fprintf(stderr, "Thread %d failed open %s: %d/%s\n",
-				tp->cpu, iop->ifn, errno, strerror(errno));
+			tp->cpu, iop->ifn, errno, strerror(errno));
 			return 1;
 		}
 
@@ -1684,9 +1684,9 @@ static int open_ios(struct tracer *tp)
 				goto err;
 		} else {
 			/*
-			 * This ensures that the server knows about all
-			 * connections & devices before _any_ closes
-			 */
+			* This ensures that the server knows about all
+			* connections & devices before _any_ closes
+			*/
 			net_send_open(cl_fds[tp->cpu], tp->cpu, dpp->buts_name);
 		}
 
@@ -1697,7 +1697,7 @@ static int open_ios(struct tracer *tp)
 
 	return 0;
 
-err:
+	err:
 	close(iop->ifd);	/* tp->nios _not_ bumped */
 	close_ios(tp);
 	return 1;
@@ -1721,7 +1721,7 @@ static int handle_pfds_file(struct tracer *tp, int nevs, int force_read)
 			}
 
 			ret = read(iop->ifd, mip->fs_buf + mip->fs_off,
-				   buf_size);
+			buf_size);
 			if (ret > 0) {
 				pdc_dr_update(iop->dpp, tp->cpu, ret);
 				mip->fs_size += ret;
@@ -1729,9 +1729,9 @@ static int handle_pfds_file(struct tracer *tp, int nevs, int force_read)
 				nentries++;
 			} else if (ret == 0) {
 				/*
-				 * Short reads after we're done stop us
-				 * from trying reads.
-				 */
+				* Short reads after we're done stop us
+				* from trying reads.
+				*/
 				if (tp->is_done)
 					clear_events(pfd);
 			} else {
@@ -1764,7 +1764,7 @@ static int handle_pfds_netclient(struct tracer *tp, int nevs, int force_read)
 
 				if (!net_sendfile_data(tp, iop)) {
 					pdc_dr_update(iop->dpp, tp->cpu,
-						      iop->ready);
+					iop->ready);
 					nentries++;
 				} else
 					clear_events(pfd);
@@ -1797,9 +1797,9 @@ static int handle_pfds_entries(struct tracer *tp, int nevs, int force_read)
 				nentries++;
 			} else if (tbp->len == 0) {
 				/*
-				 * Short reads after we're done stop us
-				 * from trying reads.
-				 */
+				* Short reads after we're done stop us
+				* from trying reads.
+				*/
 				if (tp->is_done)
 					clear_events(pfd);
 			} else {
@@ -1847,12 +1847,12 @@ static void *thread_main(void *arg)
 			(void)handle_pfds(tp, ndone, piped_output);
 		else if (ndone < 0 && errno != EINTR)
 			fprintf(stderr, "Thread %d poll failed: %d/%s\n",
-				tp->cpu, errno, strerror(errno));
+		tp->cpu, errno, strerror(errno));
 	}
 
 	/*
-	 * Trace is stopped, pull data until we get a short read
-	 */
+	* Trace is stopped, pull data until we get a short read
+	*/
 	while (handle_pfds(tp, ndevs, 1) > 0)
 		;
 
@@ -1860,7 +1860,7 @@ static void *thread_main(void *arg)
 	tracer_signal_ready(tp, Th_leaving, 0);
 	return NULL;
 
-err:
+	err:
 	tracer_signal_ready(tp, Th_error, ret);
 	return NULL;
 }
@@ -1878,7 +1878,7 @@ static int start_tracer(int cpu)
 
 	if (pthread_create(&tp->thread, NULL, thread_main, tp)) {
 		fprintf(stderr, "FAILED to start thread on CPU %d: %d/%s\n",
-			cpu, errno, strerror(errno));
+		cpu, errno, strerror(errno));
 		free(tp);
 		return 1;
 	}
@@ -1902,8 +1902,8 @@ static void start_tracers(void)
 		struct tracer *tp = list_entry(p, struct tracer, head);
 		if (tp->status)
 			fprintf(stderr,
-				"FAILED to start thread on CPU %d: %d/%s\n",
-				tp->cpu, tp->status, strerror(tp->status));
+		"FAILED to start thread on CPU %d: %d/%s\n",
+		tp->cpu, tp->status, strerror(tp->status));
 	}
 }
 
@@ -1912,16 +1912,16 @@ static void stop_tracers(void)
 	struct list_head *p;
 
 	/*
-	 * Stop the tracing - makes the tracer threads clean up quicker.
-	 */
+	* Stop the tracing - makes the tracer threads clean up quicker.
+	*/
 	__list_for_each(p, &devpaths) {
 		struct devpath *dpp = list_entry(p, struct devpath, head);
 		(void)ioctl(dpp->fd, BLKTRACESTOP);
 	}
 
 	/*
-	 * Tell each tracer to quit
-	 */
+	* Tell each tracer to quit
+	*/
 	__list_for_each(p, &tracers) {
 		struct tracer *tp = list_entry(p, struct tracer, head);
 		tp->is_done = 1;
@@ -1957,7 +1957,7 @@ static void wait_tracers(void)
 		ret = pthread_join(tp->thread, NULL);
 		if (ret)
 			fprintf(stderr, "Thread join %d failed %d\n",
-				tp->cpu, ret);
+		tp->cpu, ret);
 	}
 
 	if (use_tracer_devpaths())
@@ -2005,7 +2005,7 @@ static void show_stats(struct list_head *devpaths)
 
 		if (net_mode == Net_server)
 			printf("server: end of run for %s:%s\n",
-				dpp->ch->hostname, dpp->buts_name);
+		dpp->ch->hostname, dpp->buts_name);
 
 		data_read = 0;
 		nevents = 0;
@@ -2013,24 +2013,24 @@ static void show_stats(struct list_head *devpaths)
 		fprintf(ofp, "=== %s ===\n", dpp->buts_name);
 		for (cpu = 0, sp = dpp->stats; cpu < dpp->ncpus; cpu++, sp++) {
 			/*
-			 * Estimate events if not known...
-			 */
+			* Estimate events if not known...
+			*/
 			if (sp->nevents == 0) {
 				sp->nevents = sp->data_read /
-						sizeof(struct blk_io_trace);
+					sizeof(struct blk_io_trace);
 			}
 
 			fprintf(ofp,
-				"  CPU%3d: %20llu events, %8llu KiB data\n",
-				cpu, sp->nevents, (sp->data_read + 1023) >> 10);
+			"  CPU%3d: %20llu events, %8llu KiB data\n",
+			cpu, sp->nevents, (sp->data_read + 1023) >> 10);
 
 			data_read += sp->data_read;
 			nevents += sp->nevents;
 		}
 
 		fprintf(ofp, "  Total:  %20llu events (dropped %llu),"
-			     " %8llu KiB data\n", nevents,
-			     dpp->drops, (data_read + 1024) >> 10);
+			" %8llu KiB data\n", nevents,
+		dpp->drops, (data_read + 1024) >> 10);
 
 		total_drops += dpp->drops;
 		total_events += (nevents + dpp->drops);
@@ -2047,9 +2047,9 @@ static void show_stats(struct list_head *devpaths)
 			drops_ratio = (double)total_drops/(double)total_events;
 
 		fprintf(stderr, "\nYou have %llu (%5.1lf%%) dropped events\n"
-				"Consider using a larger buffer size (-b) "
+			"Consider using a larger buffer size (-b) "
 				"and/or more buffers (-n)\n",
-			total_drops, 100.0 * drops_ratio);
+		total_drops, 100.0 * drops_ratio);
 	}
 }
 
@@ -2061,113 +2061,113 @@ static int handle_args(int argc, char *argv[])
 
 	while ((c = getopt_long(argc, argv, S_OPTS, l_opts, NULL)) >= 0) {
 		switch (c) {
-		case 'a':
+			case 'a':
 			i = find_mask_map(optarg);
 			if (i < 0) {
 				fprintf(stderr, "Invalid action mask %s\n",
-					optarg);
+				optarg);
 				return 1;
 			}
 			act_mask_tmp |= i;
 			break;
 
-		case 'A':
+			case 'A':
 			if ((sscanf(optarg, "%x", &i) != 1) ||
-							!valid_act_opt(i)) {
+			!valid_act_opt(i)) {
 				fprintf(stderr,
-					"Invalid set action mask %s/0x%x\n",
-					optarg, i);
+				"Invalid set action mask %s/0x%x\n",
+				optarg, i);
 				return 1;
 			}
 			act_mask_tmp = i;
 			break;
 
-		case 'd':
+			case 'd':
 			if (add_devpath(optarg) != 0)
 				return 1;
 			break;
 
-		case 'I': {
-			char dev_line[256];
-			FILE *ifp = my_fopen(optarg, "r");
+			case 'I': {
+				char dev_line[256];
+				FILE *ifp = my_fopen(optarg, "r");
 
-			if (!ifp) {
-				fprintf(stderr,
+				if (!ifp) {
+					fprintf(stderr,
 					"Invalid file for devices %s\n",
 					optarg);
-				return 1;
-			}
-
-			while (fscanf(ifp, "%s\n", dev_line) == 1) {
-				if (add_devpath(dev_line) != 0) {
-					fclose(ifp);
 					return 1;
 				}
-			}
-			fclose(ifp);
-			break;
-		}
 
-		case 'r':
+				while (fscanf(ifp, "%s\n", dev_line) == 1) {
+					if (add_devpath(dev_line) != 0) {
+						fclose(ifp);
+						return 1;
+					}
+				}
+				fclose(ifp);
+				break;
+			}
+
+			case 'r':
 			debugfs_path = optarg;
 			break;
 
-		case 'o':
+			case 'o':
 			output_name = optarg;
 			break;
-		case 'k':
+			case 'k':
 			kill_running_trace = 1;
 			break;
-		case 'w':
+			case 'w':
 			stop_watch = atoi(optarg);
 			if (stop_watch <= 0) {
 				fprintf(stderr,
-					"Invalid stopwatch value (%d secs)\n",
-					stop_watch);
+				"Invalid stopwatch value (%d secs)\n",
+				stop_watch);
 				return 1;
 			}
 			break;
-		case 'V':
-		case 'v':
+			case 'V':
+			case 'v':
 			printf("%s version %s\n", argv[0], blktrace_version);
 			exit(0);
 			/*NOTREACHED*/
-		case 'b':
+			case 'b':
 			buf_size = strtoul(optarg, NULL, 10);
 			if (buf_size <= 0 || buf_size > 16*1024) {
 				fprintf(stderr, "Invalid buffer size (%lu)\n",
-					buf_size);
+				buf_size);
 				return 1;
 			}
 			buf_size <<= 10;
 			break;
-		case 'n':
+			case 'n':
 			buf_nr = strtoul(optarg, NULL, 10);
 			if (buf_nr <= 0) {
 				fprintf(stderr,
-					"Invalid buffer nr (%lu)\n", buf_nr);
+				"Invalid buffer nr (%lu)\n", buf_nr);
 				return 1;
 			}
 			break;
-		case 'D':
+			case 'D':
 			output_dir = optarg;
 			break;
-		case 'h':
+			case 'h':
 			net_mode = Net_client;
 			memset(hostname, 0, sizeof(hostname));
 			strncpy(hostname, optarg, sizeof(hostname));
 			hostname[sizeof(hostname) - 1] = '\0';
 			break;
-		case 'l':
+			case 'l':
 			net_mode = Net_server;
 			break;
-		case 'p':
+			case 'p':
 			net_port = atoi(optarg);
 			break;
-		case 's':
+			case 's':
 			net_use_sendfile = 0;
 			break;
-		default:
+			default:
 			show_usage(argv[0]);
 			exit(1);
 			/*NOTREACHED*/
@@ -2185,7 +2185,7 @@ static int handle_args(int argc, char *argv[])
 
 	if (statfs(debugfs_path, &st) < 0) {
 		fprintf(stderr, "Invalid debug path %s: %d/%s\n",
-			debugfs_path, errno, strerror(errno));
+		debugfs_path, errno, strerror(errno));
 		return 1;
 	}
 
@@ -2201,8 +2201,8 @@ static int handle_args(int argc, char *argv[])
 		return 1;
 
 	/*
-	 * Set up for appropriate PFD handler based upon output name.
-	 */
+	* Set up for appropriate PFD handler based upon output name.
+	*/
 	if (net_client_use_sendfile())
 		handle_pfds = handle_pfds_netclient;
 	else if (net_client_use_send())
@@ -2221,7 +2221,7 @@ static int handle_args(int argc, char *argv[])
 }
 
 static void ch_add_connection(struct net_server_s *ns, struct cl_host *ch,
-			      int fd)
+int fd)
 {
 	struct cl_conn *nc;
 
@@ -2242,7 +2242,7 @@ static void ch_add_connection(struct net_server_s *ns, struct cl_host *ch,
 }
 
 static void ch_rem_connection(struct net_server_s *ns, struct cl_host *ch,
-			      struct cl_conn *nc)
+struct cl_conn *nc)
 {
 	net_close_connection(&nc->fd);
 
@@ -2257,7 +2257,7 @@ static void ch_rem_connection(struct net_server_s *ns, struct cl_host *ch,
 }
 
 static struct cl_host *net_find_client_host(struct net_server_s *ns,
-					    struct in_addr cl_in_addr)
+struct in_addr cl_in_addr)
 {
 	struct list_head *p;
 
@@ -2272,7 +2272,7 @@ static struct cl_host *net_find_client_host(struct net_server_s *ns,
 }
 
 static struct cl_host *net_add_client_host(struct net_server_s *ns,
-					   struct sockaddr_in *addr)
+struct sockaddr_in *addr)
 {
 	struct cl_host *ch;
 
@@ -2338,9 +2338,9 @@ static void net_add_connection(struct net_server_s *ns)
 	fd = my_accept(ns->listen_fd, (struct sockaddr *)&ns->addr, &socklen);
 	if (fd < 0) {
 		/*
-		 * This is OK: we just won't accept this connection,
-		 * nothing fatal.
-		 */
+		* This is OK: we just won't accept this connection,
+		* nothing fatal.
+		*/
 		perror("accept");
 	} else {
 		ch = net_find_client_host(ns, ns->addr.sin_addr);
@@ -2352,8 +2352,8 @@ static void net_add_connection(struct net_server_s *ns)
 }
 
 static struct devpath *nc_add_dpp(struct cl_conn *nc,
-				  struct blktrace_net_hdr *bnh,
-				  time_t connect_time)
+struct blktrace_net_hdr *bnh,
+time_t connect_time)
 {
 	int cpu;
 	struct io_info *iop;
@@ -2389,10 +2389,10 @@ static struct devpath *nc_add_dpp(struct cl_conn *nc,
 
 	return dpp;
 
-err:
+	err:
 	/*
-	 * Need to unravel what's been done...
-	 */
+	* Need to unravel what's been done...
+	*/
 	while (cpu >= 0)
 		close_iop(&dpp->ios[cpu--]);
 	dpp_free(dpp);
@@ -2401,7 +2401,7 @@ err:
 }
 
 static struct devpath *nc_find_dpp(struct cl_conn *nc,
-				   struct blktrace_net_hdr *bnh)
+struct blktrace_net_hdr *bnh)
 {
 	struct list_head *p;
 	time_t connect_time = nc->connect_time;
@@ -2420,7 +2420,7 @@ static struct devpath *nc_find_dpp(struct cl_conn *nc,
 }
 
 static void net_client_read_data(struct cl_conn *nc, struct devpath *dpp,
-				 struct blktrace_net_hdr *bnh)
+struct blktrace_net_hdr *bnh)
 {
 	int ret;
 	struct io_info *iop = &dpp->ios[bnh->cpu];
@@ -2428,7 +2428,7 @@ static void net_client_read_data(struct cl_conn *nc, struct devpath *dpp,
 
 	if (setup_mmap(iop->ofd, bnh->len, &iop->mmap_info, NULL)) {
 		fprintf(stderr, "ncd(%s:%d): mmap failed\n",
-			nc->ch->hostname, nc->fd);
+		nc->ch->hostname, nc->fd);
 		exit(1);
 	}
 
@@ -2442,9 +2442,9 @@ static void net_client_read_data(struct cl_conn *nc, struct devpath *dpp,
 }
 
 /*
- * Returns 1 if we closed a host - invalidates other polling information
- * that may be present.
- */
+* Returns 1 if we closed a host - invalidates other polling information
+* that may be present.
+*/
 static int net_client_data(struct cl_conn *nc)
 {
 	int ret;
@@ -2478,7 +2478,7 @@ static int net_client_data(struct cl_conn *nc)
 
 	if ((bnh.magic & 0xffffff00) != BLK_IO_TRACE_MAGIC) {
 		fprintf(stderr, "ncd(%s:%d): bad data magic\n",
-			nc->ch->hostname, nc->fd);
+		nc->ch->hostname, nc->fd);
 		exit(1);
 	}
 
@@ -2486,20 +2486,20 @@ static int net_client_data(struct cl_conn *nc)
 		nc->ncpus = bnh.max_cpus;
 
 	/*
-	 * len == 0 means the other end is sending us a new connection/dpp
-	 * len == 1 means that the other end signalled end-of-run
-	 */
+	* len == 0 means the other end is sending us a new connection/dpp
+	* len == 1 means that the other end signalled end-of-run
+	*/
 	dpp = nc_find_dpp(nc, &bnh);
 	if (bnh.len == 0) {
 		/*
-		 * Just adding in the dpp above is enough
-		 */
+		* Just adding in the dpp above is enough
+		*/
 		ack_open_close(nc->fd, dpp->buts_name);
 		nc->ch->cl_opens++;
 	} else if (bnh.len == 1) {
 		/*
-		 * overload cpu count with dropped events
-		 */
+		* overload cpu count with dropped events
+		*/
 		dpp->drops = bnh.cpu;
 
 		ack_open_close(nc->fd, dpp->buts_name);
@@ -2618,15 +2618,15 @@ static int net_server(void)
 	}
 
 	/*
-	 * The actual server looping is done here:
-	 */
+	* The actual server looping is done here:
+	*/
 	ns->listen_fd = fd;
 	ret = net_server_handle_connections(ns);
 
 	/*
-	 * Clean up and return...
-	 */
-out:
+	* Clean up and return...
+	*/
+	out:
 	free(ns->pfds);
 	return ret;
 }
@@ -2675,14 +2675,15 @@ void error (char *msg){
 	exit(1);
 }
 
-static char *serial_buffer;
+// static char *serial_buffer;
 void writeToClient(struct blk_io_trace * t){	
-	if (serial_buffer == NULL) 
-		serial_buffer = malloc(SE_STRUCT_SIZE);
-		
-  	serializeIOTrace(t, serial_buffer); // t의 내용이 소켓통신 가능한 byte stream으로 serialize 되서 buffer에 저장됨.
-  	int n = write (connfd, t, SE_STRUCT_SIZE);
-    
+	// if (serial_buffer == NULL)
+		// serial_buffer = malloc(SE_STRUCT_SIZE);		
+	// serializeIOTrace(t, serial_buffer); // t의 내용이 소켓통신 가능한 byte stream으로 serialize 되서 buffer에 저장됨.
+	
+	printf("send #%d trace\n",t->sequence);
+	
+	int n = write (connfd, t, SE_STRUCT_SIZE);
 	if(n<0) {
 		printf("Error writing to socket: %d\n",n);
 		exit(-1);
@@ -2692,153 +2693,153 @@ void writeToClient(struct blk_io_trace * t){
 int main(int argc, char *argv[])
 {
 
-int listenfd; /* listening socket */
-  //int connfd; /* connection socket */
-  int portno; /* port to listen on */
-  int clientlen; /* byte size of client's address */
-  struct sockaddr_in serveraddr; /* server's addr */
-  struct sockaddr_in clientaddr; /* client addr */
-  struct hostent *hostp; /* client host info */
-  char *hostaddrp; /* dotted decimal host addr string */
-  int optval; /* flag value for setsockopt */
+	int listenfd; /* listening socket */
+	//int connfd; /* connection socket */
+	int portno; /* port to listen on */
+	int clientlen; /* byte size of client's address */
+	struct sockaddr_in serveraddr; /* server's addr */
+	struct sockaddr_in clientaddr; /* client addr */
+	struct hostent *hostp; /* client host info */
+	char *hostaddrp; /* dotted decimal host addr string */
+	int optval; /* flag value for setsockopt */
 
-  /* check command line args */
-/*  if (argc != 2) {
-    fprintf(stderr, "usage: %s <port>\n", argv[0]);
-    exit(1);
-  }*/
-  portno = net_port;
+	/* check command line args */
+	/*  if (argc != 2) {
+	fprintf(stderr, "usage: %s <port>\n", argv[0]);
+	exit(1);
+	}*/
+	portno = net_port;
 
-  /* socket: create a socket */
-  listenfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (listenfd < 0) 
-    error("ERROR opening socket");
+	/* socket: create a socket */
+	listenfd = socket(AF_INET, SOCK_STREAM, 0);
+	if (listenfd < 0) 
+		error("ERROR opening socket");
 
-  /* setsockopt: Handy debugging trick that lets 
-   * us rerun the server immediately after we kill it; 
-   * otherwise we have to wait about 20 secs. 
-   * Eliminates "ERROR on binding: Address already in use" error. 
-   */
-  optval = 1;
-  setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, 
-	     (const void *)&optval , sizeof(int));
+	/* setsockopt: Handy debugging trick that lets 
+	* us rerun the server immediately after we kill it; 
+	* otherwise we have to wait about 20 secs. 
+	* Eliminates "ERROR on binding: Address already in use" error. 
+	*/
+	optval = 1;
+	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, 
+	(const void *)&optval , sizeof(int));
 
-  /* build the server's internet address */
-  bzero((char *) &serveraddr, sizeof(serveraddr));
-  serveraddr.sin_family = AF_INET; /* we are using the Internet */
-  serveraddr.sin_addr.s_addr = htonl(INADDR_ANY); /* accept reqs to any IP addr */
-  serveraddr.sin_port = htons((unsigned short)portno); /* port to listen on */
+	/* build the server's internet address */
+	bzero((char *) &serveraddr, sizeof(serveraddr));
+	serveraddr.sin_family = AF_INET; /* we are using the Internet */
+	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY); /* accept reqs to any IP addr */
+	serveraddr.sin_port = htons((unsigned short)portno); /* port to listen on */
 
-  /* bind: associate the listening socket with a port */
-  if (bind(listenfd, (struct sockaddr *) &serveraddr, 
-	   sizeof(serveraddr)) < 0) 
-    error("ERROR on binding");
+	/* bind: associate the listening socket with a port */
+	if (bind(listenfd, (struct sockaddr *) &serveraddr, 
+	sizeof(serveraddr)) < 0) 
+		error("ERROR on binding");
 
-  /* listen: make it a listening socket ready to accept connection requests */
-  if (listen(listenfd, 5) < 0) /* allow 5 requests to queue up */ 
-    error("ERROR on listen");
+	/* listen: make it a listening socket ready to accept connection requests */
+	if (listen(listenfd, 5) < 0) /* allow 5 requests to queue up */ 
+		error("ERROR on listen");
 
-  /* main loop: wait for a connection request, echo input line, 
-     then close connection. */
-  clientlen = sizeof(clientaddr);
-  while (1) {
+	/* main loop: wait for a connection request, echo input line, 
+	then close connection. */
+	clientlen = sizeof(clientaddr);
+	while (1) {
 
-    /* accept: wait for a connection request */
-    connfd = accept(listenfd, (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen);
-    if (connfd < 0) 
-      error("ERROR on accept");
+		/* accept: wait for a connection request */
+		connfd = accept(listenfd, (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen);
+		if (connfd < 0) 
+			error("ERROR on accept");
     
-    /* gethostbyaddr: determine who sent the message */
-    hostp = gethostbyaddr((const char *)&clientaddr.sin_addr.s_addr, 
-			  sizeof(clientaddr.sin_addr.s_addr), AF_INET);
-    if (hostp == NULL)
-      error("ERROR on gethostbyaddr");
-    hostaddrp = inet_ntoa(clientaddr.sin_addr);
-    if (hostaddrp == NULL)
-      error("ERROR on inet_ntoa\n");
-    printf("server established connection with %s (%s)\n", 
-	   hostp->h_name, hostaddrp);
+		/* gethostbyaddr: determine who sent the message */
+		hostaddrp = inet_ntoa(clientaddr.sin_addr);
+		printf("client addr: %s\n",hostaddrp);
+		hostp = gethostbyname(hostaddrp);//, clientlen, AF_INET);
+		if (hostp == NULL)
+			error("ERROR on gethostbyaddr");
+		if (hostaddrp == NULL)
+			error("ERROR on inet_ntoa\n");
+		printf("server established connection with %s (%s)\n", 
+		hostp->h_name, hostaddrp);
     
 
-    /* read: read input string from the client */
- /*   bzero(buf, BUFSIZE);
-    n = read(connfd, buf, BUFSIZE);
-    if (n < 0) 
-      error("ERROR reading from socket");
-    printf("server received %d bytes: %s", n, buf);
-*/    
-    /* write: echo the input string back to the client */
- /*   n = write(connfd, buf, strlen(buf));
-    if (n < 0) 
-      error("ERROR writing to socket");
-*/
+		/* read: read input string from the client */
+		/*   bzero(buf, BUFSIZE);
+		n = read(connfd, buf, BUFSIZE);
+		if (n < 0) 
+		error("ERROR reading from socket");
+		printf("server received %d bytes: %s", n, buf);
+		*/    
+		/* write: echo the input string back to the client */
+		/*   n = write(connfd, buf, strlen(buf));
+		if (n < 0) 
+		error("ERROR writing to socket");
+		*/
 
 
 
-//    close(connfd);
+		//    close(connfd);
   
 
-//original code from here on.
+		//original code from here on.
 
 
 
-int ret = 0;
+		int ret = 0;
 
-	setlocale(LC_NUMERIC, "en_US");
-	pagesize = getpagesize();
-	ncpus = sysconf(_SC_NPROCESSORS_CONF);
-	if (ncpus < 0) {
-		fprintf(stderr, "sysconf(_SC_NPROCESSORS_CONF) failed %d/%s\n",
+		setlocale(LC_NUMERIC, "en_US");
+		pagesize = getpagesize();
+		ncpus = sysconf(_SC_NPROCESSORS_CONF);
+		if (ncpus < 0) {
+			fprintf(stderr, "sysconf(_SC_NPROCESSORS_CONF) failed %d/%s\n",
 			errno, strerror(errno));
-		ret = 1;
-		goto out;
-	} else if (handle_args(argc, argv)) {
-		ret = 1;
-		goto out;
-	}
+			ret = 1;
+			goto out;
+		} else if (handle_args(argc, argv)) {
+			ret = 1;
+			goto out;
+		}
 
-	if (ndevs > 1 && output_name && strcmp(output_name, "-") != 0) {
-		fprintf(stderr, "-o not supported with multiple devices\n");
-		ret = 1;
-		goto out;
-	}
+		if (ndevs > 1 && output_name && strcmp(output_name, "-") != 0) {
+			fprintf(stderr, "-o not supported with multiple devices\n");
+			ret = 1;
+			goto out;
+		}
 
-	signal(SIGINT, handle_sigint);
-	signal(SIGHUP, handle_sigint);
-	signal(SIGTERM, handle_sigint);
-	signal(SIGALRM, handle_sigint);
-	signal(SIGPIPE, SIG_IGN);
+		signal(SIGINT, handle_sigint);
+		signal(SIGHUP, handle_sigint);
+		signal(SIGTERM, handle_sigint);
+		signal(SIGALRM, handle_sigint);
+		signal(SIGPIPE, SIG_IGN);
 
-	if (kill_running_trace) {
-		struct devpath *dpp;
-		struct list_head *p;
+		if (kill_running_trace) {
+			struct devpath *dpp;
+			struct list_head *p;
 
-		__list_for_each(p, &devpaths) {
-			dpp = list_entry(p, struct devpath, head);
-			if (__stop_trace(dpp->fd)) {
-				fprintf(stderr,
+			__list_for_each(p, &devpaths) {
+				dpp = list_entry(p, struct devpath, head);
+				if (__stop_trace(dpp->fd)) {
+					fprintf(stderr,
 					"BLKTRACETEARDOWN %s failed: %d/%s\n",
 					dpp->path, errno, strerror(errno));
+				}
 			}
-		}
-	} else if (net_mode == Net_server) {
-		if (output_name) {
-			fprintf(stderr, "-o ignored in server mode\n");
-			output_name = NULL;
-		}
-		ret = net_server();
-	} else
-		ret = run_tracers();
+		} else if (net_mode == Net_server) {
+			if (output_name) {
+				fprintf(stderr, "-o ignored in server mode\n");
+				output_name = NULL;
+			}
+			ret = net_server();
+		} else
+			ret = run_tracers();
 
-out:
-	if (pfp)
-		fclose(pfp);
-	rel_devpaths();
+		out:
+		if (pfp)
+			fclose(pfp);
+		rel_devpaths();
 
-close(connfd);
-	return ret;
+		close(connfd);
+		return ret;
 
-}
+	}
 
 	
 }
