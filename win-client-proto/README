@@ -1,0 +1,2 @@
+#to compile
+g++ client.cpp -lws2_32 -o client.exe
