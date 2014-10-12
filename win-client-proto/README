@@ -1,2 +1,5 @@
-#to compile
+# to compile
 g++ client.cpp -lws2_32 -o client.exe
+
+# to use
+client.exe {host-ip}
