@@ -1,0 +1,18 @@
+﻿<Window x:Class="ValtioClient.EnvSetup"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="VALTIO" Height="450" Width="400" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Environment Setup" VerticalAlignment="Top" FontSize="24" FontWeight="Bold"/>
+        <TextBlock HorizontalAlignment="Left" Margin="10,60,0,0" TextWrapping="Wrap" Text="Select the storage device you want to trace. Also, tell us the trace length, time window and block unit." VerticalAlignment="Top"/>
+        <ListBox x:Name="deviceList" HorizontalAlignment="Left" Height="100" Margin="36,153,0,0" VerticalAlignment="Top" Width="100" SelectionChanged="deviceList_SelectionChanged"/>
+        <Label Content="Select device" HorizontalAlignment="Left" Margin="36,122,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+        <Label Content="Trace length" HorizontalAlignment="Left" Margin="213,122,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+        <Label Content="Time window" HorizontalAlignment="Left" Margin="213,193,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+        <Label Content="Block unit" HorizontalAlignment="Left" Margin="213,260,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+        <TextBox x:Name="traceLength" HorizontalAlignment="Left" Height="23" Margin="213,148,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="timeWindow" HorizontalAlignment="Left" Height="23" Margin="213,219,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="blockUnit" HorizontalAlignment="Left" Height="23" Margin="213,286,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="traceBtn" Content="Trace!" HorizontalAlignment="Left" Margin="145,332,0,0" VerticalAlignment="Top" Width="100" Height="35" Click="traceBtn_Click"/>
+    </Grid>
+</Window>
