@@ -11,7 +11,7 @@ all: $(ALL)
 %.o: %.c
 	$(CC) -o $*.o -c $(ALL_CFLAGS) $<
 
-valtio: serialization.o blktrace.o act_mask.o valtio.o 
+valtio: serialization.o act_mask.o socket_comm.o blktrace.o valtio.o 
 	$(CC) $(ALL_CFLAGS) -o $@ $(filter %.o,$^) $(LIBS)
 
 clean: 

@@ -49,18 +49,55 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/sendfile.h>
-
 #include "list.h"
-#include "blktrace.h"
 
-#include "serialization.h"
+#include "blktrace.h"
+#include "socket_comm.h"
+
+char* createString(char* src) {
+	int size = strlen(src);
+	char *dst = malloc(size);
+	memcpy(dst,src,size);
+	return dst;
+}
+
+// added by Jungho Bang. 2014. 11. 7. VALTIO team. 
+int blk_main(int argc, char *argv[]);
+int startBlktrace(char* device, int stopTime)
+{
+	printf("start blktrace\n");
+
+	char timeStr[8];
+	memset(timeStr,0,8);
+	sprintf(timeStr,"%d",stopTime);
+
+	int argc = 15;
+	char **args = malloc(sizeof(char*)*argc);
+	int i = 0;
+	args[i++] = createString("blktrace");
+	args[i++] = createString("-d");
+	args[i++] = createString(device);
+	args[i++] = createString("-w");
+	args[i++] = createString(timeStr);
+	args[i++] = createString("-o");
+	args[i++] = createString("-");
+	args[i++] = createString("-a");
+	args[i++] = createString("read");
+	args[i++] = createString("-a");
+	args[i++] = createString("write");
+	args[i++] = createString("-a");
+	args[i++] = createString("issue");
+	args[i++] = createString("-a");
+	args[i++] = createString("complete");
+	
+	return blk_main(argc, args);
+}
+// --------------------------------- VALTIO team. 
 
 /*
 * You may want to increase this even more, if you are logging at a high
 * rate and see skipped/missed events
 */
-
-#define BUFSIZE 1024
 
 #define BUF_SIZE		(512 * 1024)
 #define BUF_NR			(4)
@@ -69,10 +106,6 @@
 
 #define DEBUGFS_TYPE		(0x64626720)
 #define TRACE_NET_PORT		(8462)
-
-
-void writeToClient(struct blk_io_trace*);
-static int connfd;
 
 enum {
 	Net_none = 0,
@@ -1359,8 +1392,9 @@ struct trace_buf *tbp)
 	return prev;
 }
 
-static int handle_list_file(struct tracer_devpath_head *hd,
-struct list_head *list)
+static void exit_tracing(void);
+
+static int handle_list_file(struct tracer_devpath_head *hd, struct list_head *list)
 {
 	int off, t_len, nevents;
 	struct blk_io_trace *t;
@@ -1390,10 +1424,14 @@ struct list_head *list)
 		while (off + (int)sizeof(*t) <= tbp->len) {
 			t = (struct blk_io_trace *)(tbp->buf + off);
 			t_len = sizeof(*t) + t->pdu_len;
-            
-			//printf ("OUTPUT: %d \t%d \t%ld \t%ld \n",t->pid,t->action,t->sector,t->time);
-			writeToClient(t);
-            
+
+			// added by Jungho Bang. 2014. 11. 7. VALTIO team. 
+			int ret = sendTraceToSocket(t);
+			if (ret < 0) {
+				printf("VALTIO socket error.");
+				exit_tracing();
+			}
+			
 			if (off + t_len > tbp->len)
 				break;
 
@@ -2668,26 +2706,6 @@ static int run_tracers(void)
 	del_tracers();
 
 	return 0;
-}
-
-void error (char *msg){
-	perror(msg);
-	exit(1);
-}
-
-// static char *serial_buffer;
-void writeToClient(struct blk_io_trace * t){	
-	// if (serial_buffer == NULL)
-		// serial_buffer = malloc(SE_STRUCT_SIZE);		
-	// serializeIOTrace(t, serial_buffer); // t의 내용이 소켓통신 가능한 byte stream으로 serialize 되서 buffer에 저장됨.
-	
-	printf("send #%d trace\n",t->sequence);
-	
-	int n = write (connfd, t, SE_STRUCT_SIZE);
-	if(n<0) {
-		printf("Error writing to socket: %d\n",n);
-		exit(-1);
-	}
 }
 
 int blk_main(int argc, char *argv[])
