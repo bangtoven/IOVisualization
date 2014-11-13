@@ -16,7 +16,7 @@ using System.Windows.Shapes;
 namespace ValtioClient
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for StartUp.xaml
     /// </summary>
     public partial class StartUp : Window
     {
@@ -32,7 +32,19 @@ namespace ValtioClient
         {
             _serverIP = serverIP.Text;
             _serverPort = serverPort.Text;
-            MessageBox.Show("IP: " +_serverIP + "\nPort: " + _serverPort);
+            if (_serverIP == null || _serverIP == "" || _serverPort == null || _serverPort == "")
+            {
+                MessageBox.Show("Please input both IP address and port of target server.");
+                return;
+            }
+
+            // Store server IP and port as global preference
+            GlobalPref.setServerIP(_serverIP);
+            GlobalPref.setServerPort(_serverPort);
+
+            MessageBox.Show("IP: " +_serverIP + "\nPort: " + _serverPort); // DEBUG
+
+            // Prepare and show environment setup window
             Window envSetup = new EnvSetup();
             envSetup.Show();
             this.Close();

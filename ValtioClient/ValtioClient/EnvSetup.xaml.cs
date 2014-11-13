@@ -19,11 +19,11 @@ namespace ValtioClient
     /// </summary>
     public partial class EnvSetup : Window
     {
-        String device;
-        String _traceLength;
-        String _timeWindow;
-        String _blockUnit;
-        List<String> items;
+        String device = null;
+        int _traceLength;
+        int _timeWindow;
+        int _blockUnit;
+        List<String> items = null;
 
         public EnvSetup()
         {
@@ -38,14 +38,75 @@ namespace ValtioClient
 
         private void traceBtn_Click(object sender, RoutedEventArgs e)
         {
-            _traceLength = traceLength.Text;
-            _timeWindow = timeWindow.Text;
-            _blockUnit = blockUnit.Text;
-            MessageBox.Show("Device: " + device + "\nTrace length: " + _traceLength + "\nTime window: " + _timeWindow + "\nBlock unit: " + _blockUnit);
-            Window TracingIcon = new TracingIcon();
-            this.WindowStyle = WindowStyle.SingleBorderWindow;
-            this.WindowState = WindowState.Minimized;
-            TracingIcon.Show();
+            Boolean exOccured = false;
+            // Check if device was selected
+            if (device == null)
+            {
+                MessageBox.Show("Please select target device.");
+                exOccured = true;
+            }
+
+            // Store trace length
+            try
+            {
+                _traceLength = Convert.ToInt32(traceLength.Text);
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Please input trace length in integer form.");
+                exOccured = true;
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Integer overflow: please input shorter trace length");
+                exOccured = true;
+            }
+
+            // Store time window
+            try
+            {
+                _timeWindow = Convert.ToInt32(timeWindow.Text);
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Please input time window in integer form.");
+                exOccured = true;
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Integer overflow: please input shorter time window");
+                exOccured = true;
+            }
+
+            // Store block unit
+            try
+            {
+                _blockUnit = Convert.ToInt32(blockUnit.Text);
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Please input block unit in integer form.");
+                exOccured = true;
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Integer overflow: please input shorter block unit");
+                exOccured = true;
+            }
+
+            if (!exOccured)
+            {
+                // Store above data as global preference
+                GlobalPref.setDeviceID(device);
+                GlobalPref.setTraceLength(_traceLength);
+                GlobalPref.setTimeWindow(_timeWindow);
+                GlobalPref.setBlockUnit(_blockUnit);
+
+                MessageBox.Show("Device: " + device + "\nTrace length: " + _traceLength + "\nTime window: " + _timeWindow + "\nBlock unit: " + _blockUnit); // DEBUG
+                Window TracingIcon = new TracingIcon();
+                TracingIcon.Show();
+                this.Close();
+            }
         }
 
         private void deviceList_SelectionChanged(object sender, SelectionChangedEventArgs e)

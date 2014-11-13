@@ -4,8 +4,8 @@
         xmlns:tb="http://www.hardcodet.net/taskbar" WindowState="Minimized" ShowInTaskbar="False" ResizeMode="NoResize">
     <Grid>
         <tb:TaskbarIcon
-        IconSource="/res/valtio_128.ico"
-        ToolTipText="hello world" />
+        IconSource="./Resources/valtio.ico"
+        ToolTipText="Tracing..." />
     </Grid>
     
 </Window>

@@ -18,3 +18,5 @@ C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debu
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\Hardcodet.Wpf.TaskbarNotification.xml
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\TracingIcon.baml
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\TracingIcon.g.cs
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\MainWindow.baml
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\MainWindow.g.cs
