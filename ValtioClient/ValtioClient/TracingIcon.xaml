@@ -2,10 +2,14 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:tb="http://www.hardcodet.net/taskbar" WindowState="Minimized" ShowInTaskbar="False" ResizeMode="NoResize">
-    <Grid>
-        <tb:TaskbarIcon
+    <tb:TaskbarIcon x:Name="ValtioNotifyIcon"
         IconSource="./Resources/valtio.ico"
-        ToolTipText="Tracing..." />
-    </Grid>
-    
+        ToolTipText="{Binding Path=ToopTipText}" TrayToolTipOpen="ValtioNotifyIcon_TrayToolTipOpen">
+        <tb:TaskbarIcon.ContextMenu>
+            <ContextMenu>
+                <MenuItem x:Name="stopTrace" Header="Stop Tracing" Click="stopTrace_Click" />
+                <MenuItem x:Name="quitTrace" Header="Quit" Click="quitTrace_Click" />
+            </ContextMenu>
+        </tb:TaskbarIcon.ContextMenu>
+    </tb:TaskbarIcon>
 </Window>
