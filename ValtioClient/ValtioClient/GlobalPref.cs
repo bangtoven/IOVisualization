@@ -12,7 +12,7 @@ namespace ValtioClient
         private static String serverIP = null;
         private static String serverPort = null;
         private static String deviceID = null;
-        private static int traceLength = 0;
+        private static int traceLength = 0; // Length of trace in seconds
         private static int timeWindow = 0;
         private static int blockUnit = 0;
 

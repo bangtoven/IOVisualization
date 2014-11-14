@@ -17,7 +17,7 @@ namespace ValtioClient
     /// <summary>
     /// Interaction logic for EnvSetup.xaml
     /// </summary>
-    public partial class EnvSetup : Window
+    public partial class EnvSetup
     {
         String device = null;
         int _traceLength;
@@ -49,7 +49,7 @@ namespace ValtioClient
             // Store trace length
             try
             {
-                _traceLength = Convert.ToInt32(traceLength.Text);
+                _traceLength = (Convert.ToInt32(traceLengthHour.Text) * 60 + Convert.ToInt32(traceLengthMin.Text)) * 60;
             }
             catch (FormatException)
             {

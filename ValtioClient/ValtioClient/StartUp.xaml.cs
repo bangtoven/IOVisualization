@@ -18,7 +18,7 @@ namespace ValtioClient
     /// <summary>
     /// Interaction logic for StartUp.xaml
     /// </summary>
-    public partial class StartUp : Window
+    public partial class StartUp
     {
         private String _serverIP;
         private String _serverPort;
@@ -41,8 +41,6 @@ namespace ValtioClient
             // Store server IP and port as global preference
             GlobalPref.setServerIP(_serverIP);
             GlobalPref.setServerPort(_serverPort);
-
-            MessageBox.Show("IP: " +_serverIP + "\nPort: " + _serverPort); // DEBUG
 
             // Prepare and show environment setup window
             Window envSetup = new EnvSetup();

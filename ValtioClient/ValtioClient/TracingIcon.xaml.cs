@@ -19,7 +19,7 @@ namespace ValtioClient
     /// <summary>
     /// Interaction logic for TracingIcon.xaml
     /// </summary>
-    public partial class TracingIcon : Window
+    public partial class TracingIcon
     {
         private TaskbarIcon tb;
         private Stopwatch sw;

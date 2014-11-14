@@ -1,18 +1,48 @@
-﻿<Window x:Class="ValtioClient.EnvSetup"
+﻿<extra:Window x:Class="ValtioClient.EnvSetup"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:extra="http://schemas.extra.com/ui"
         Title="VALTIO" Height="450" Width="400" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen">
-    <Grid>
-        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Environment Setup" VerticalAlignment="Top" FontSize="24" FontWeight="Bold"/>
-        <TextBlock HorizontalAlignment="Left" Margin="10,60,0,0" TextWrapping="Wrap" Text="Select the storage device you want to trace. Also, tell us the trace length, time window and block unit." VerticalAlignment="Top"/>
-        <ListBox x:Name="deviceList" HorizontalAlignment="Left" Height="100" Margin="36,153,0,0" VerticalAlignment="Top" Width="100" SelectionChanged="deviceList_SelectionChanged"/>
-        <Label Content="Select device" HorizontalAlignment="Left" Margin="36,122,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
-        <Label Content="Trace length" HorizontalAlignment="Left" Margin="213,122,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
-        <Label Content="Time window" HorizontalAlignment="Left" Margin="213,193,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
-        <Label Content="Block unit" HorizontalAlignment="Left" Margin="213,260,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
-        <TextBox x:Name="traceLength" HorizontalAlignment="Left" Height="23" Margin="213,148,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-        <TextBox x:Name="timeWindow" HorizontalAlignment="Left" Height="23" Margin="213,219,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-        <TextBox x:Name="blockUnit" HorizontalAlignment="Left" Height="23" Margin="213,286,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-        <Button x:Name="traceBtn" Content="Trace!" HorizontalAlignment="Left" Margin="145,332,0,0" VerticalAlignment="Top" Width="100" Height="35" Click="traceBtn_Click"/>
-    </Grid>
-</Window>
+    <StackPanel Orientation="Vertical" Margin="10">
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Environment Setup" FontSize="24" FontWeight="Bold"/>
+        <TextBlock HorizontalAlignment="Stretch" Margin="0,10,0,0" TextWrapping="Wrap" Text="Select the storage device you want to trace. Also, tell us the trace length, time window and block unit."/>
+        <Grid Margin="0,50,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Vertical">
+                <Label Content="Select device" HorizontalAlignment="Center" FontWeight="Bold"/>
+                <ListBox x:Name="deviceList" HorizontalAlignment="Center" Height="100" Margin="0,10,0,0" Width="100" SelectionChanged="deviceList_SelectionChanged"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Grid.Column="1">
+                <Label Content="Trace length" HorizontalAlignment="Center" VerticalAlignment="Top" FontWeight="Bold"/>
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBox x:Name="traceLengthHour" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Width="40" VerticalAlignment="Center"/>
+                        <TextBlock HorizontalAlignment="Left" Margin="10,0,5,0" TextWrapping="Wrap" Text="hr" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
+                        <TextBox x:Name="traceLengthMin" HorizontalAlignment="Left" Margin="5,0,0,0" Height="23" TextWrapping="Wrap" Width="40" VerticalAlignment="Center"/>
+                        <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" TextWrapping="Wrap" Text="min" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+                <Label Content="Time window" HorizontalAlignment="Center" Margin="0,10,0,0" FontWeight="Bold"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                    <TextBox x:Name="timeWindow" HorizontalAlignment="Left" Height="23"  TextWrapping="Wrap" Width="40" VerticalAlignment="Center"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" TextWrapping="Wrap" Text="sec" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Label Content="Block unit" HorizontalAlignment="Center" Margin="0,10,0,0" FontWeight="Bold"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                    <TextBox x:Name="blockUnit" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="40"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,0,0,0" TextWrapping="Wrap" Text="blocks" VerticalAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+        <Button x:Name="traceBtn" Content="Trace!" HorizontalAlignment="Center" Margin="0,30,0,0" VerticalAlignment="Top" Width="100" Height="35" Click="traceBtn_Click"/>
+    </StackPanel>
+</extra:Window>
