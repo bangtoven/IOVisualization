@@ -33,6 +33,13 @@ namespace ValtioClient
             items.Add("Element 1");
             items.Add("Element 2");
             items.Add("Element 3");
+            items.Add("Element 4");
+            items.Add("Element 5");
+            items.Add("Element 6");
+            items.Add("Element 7");
+            items.Add("Element 8");
+            items.Add("Element 9");
+            items.Add("Element 10");
             deviceList.ItemsSource = items;
         }
 
@@ -42,7 +49,7 @@ namespace ValtioClient
             // Check if device was selected
             if (device == null)
             {
-                MessageBox.Show("Please select target device.");
+                GlobalFunc.ShowMessageBox("Error", "Please select target device.");
                 exOccured = true;
             }
 
@@ -53,12 +60,12 @@ namespace ValtioClient
             }
             catch (FormatException)
             {
-                MessageBox.Show("Please input trace length in integer form.");
+                GlobalFunc.ShowMessageBox("Error", "Please input trace length in integer form.");
                 exOccured = true;
             }
             catch (OverflowException)
             {
-                MessageBox.Show("Integer overflow: please input shorter trace length");
+                GlobalFunc.ShowMessageBox("Error", "Integer overflow: please input shorter trace length.");
                 exOccured = true;
             }
 
@@ -69,12 +76,12 @@ namespace ValtioClient
             }
             catch (FormatException)
             {
-                MessageBox.Show("Please input time window in integer form.");
+                GlobalFunc.ShowMessageBox("Error", "Please input time window in integer form.");
                 exOccured = true;
             }
             catch (OverflowException)
             {
-                MessageBox.Show("Integer overflow: please input shorter time window");
+                GlobalFunc.ShowMessageBox("Error", "Integer overflow: please input shorter time window.");
                 exOccured = true;
             }
 
@@ -85,12 +92,12 @@ namespace ValtioClient
             }
             catch (FormatException)
             {
-                MessageBox.Show("Please input block unit in integer form.");
+                GlobalFunc.ShowMessageBox("Error", "Please input block unit in integer form.");
                 exOccured = true;
             }
             catch (OverflowException)
             {
-                MessageBox.Show("Integer overflow: please input shorter block unit");
+                GlobalFunc.ShowMessageBox("Error", "Integer overflow: please input smaller block unit.");
                 exOccured = true;
             }
 
@@ -102,17 +109,29 @@ namespace ValtioClient
                 GlobalPref.setTimeWindow(_timeWindow);
                 GlobalPref.setBlockUnit(_blockUnit);
 
-                MessageBox.Show("Device: " + device + "\nTrace length: " + _traceLength + "\nTime window: " + _timeWindow + "\nBlock unit: " + _blockUnit); // DEBUG
-                Window TracingIcon = new TracingIcon();
-                TracingIcon.Show();
-                this.Close();
+                // Confirm and start tracing
+                GlobalFunc.ShowConfirmMessageBox("Confirm", "Are you sure you want to proceed?", ShowTray);
             }
         }
 
         private void deviceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            device = deviceList.SelectedItem.ToString();
-            MessageBox.Show(device);
+            if (deviceList.SelectedItem == null)
+            {
+                device = null;
+            }
+            else
+            {
+                device = deviceList.SelectedItem.ToString();
+            }
+        }
+
+        private void ShowTray()
+        {
+            // Show tray icon
+            Window TracingIcon = new TracingIcon();
+            TracingIcon.Show();
+            this.Close();
         }
     }
 }

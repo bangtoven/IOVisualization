@@ -2,7 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:extra="http://schemas.extra.com/ui"
-        xmlns:metro="http://schemas.codeplex.com/elysium" x:Class="ValtioClient.MainWindow"
-        Title="VALTIO" Height="600" Width="800" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen">
+        xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls" x:Class="ValtioClient.MainWindow"
+        Title="VALTIO" Height="600" Width="800" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
+        TitleBarBackground="#42b5e8" TitleBarForeground="White">
     <Grid/>
 </extra:Window>

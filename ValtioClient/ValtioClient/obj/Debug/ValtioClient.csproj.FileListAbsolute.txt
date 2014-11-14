@@ -21,6 +21,7 @@ C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debu
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\MainWindow.baml
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\MainWindow.g.cs
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\App.baml
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\System.Windows.Interactivity.dll
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\Elysium.dll
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\Framework.dll
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\Framework.UI.dll
@@ -30,7 +31,6 @@ C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debu
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\System.Reactive.Linq.dll
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\System.Reactive.PlatformServices.dll
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\System.Reactive.Windows.Threading.dll
-C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\System.Windows.Interactivity.dll
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\Microsoft.Expression.Drawing.dll
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\Framework.pdb
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\Framework.UI.pdb

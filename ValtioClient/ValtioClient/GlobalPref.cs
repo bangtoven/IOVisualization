@@ -15,6 +15,8 @@ namespace ValtioClient
         private static int traceLength = 0; // Length of trace in seconds
         private static int timeWindow = 0;
         private static int blockUnit = 0;
+        public static String timeElapsed = null;
+        public static int donePercent = 0;
 
         // Get & set serverIP
         public static void setServerIP(String t)

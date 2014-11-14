@@ -34,7 +34,7 @@ namespace ValtioClient
             _serverPort = serverPort.Text;
             if (_serverIP == null || _serverIP == "" || _serverPort == null || _serverPort == "")
             {
-                MessageBox.Show("Please input both IP address and port of target server.");
+                GlobalFunc.ShowMessageBox("Error", "Please input both the server's IP address and port.");
                 return;
             }
 
