@@ -45,63 +45,95 @@ namespace ValtioClient
 
         private void traceBtn_Click(object sender, RoutedEventArgs e)
         {
-            Boolean exOccured = false;
+            int errortype = 0;
+
             // Check if device was selected
             if (device == null)
             {
-                GlobalFunc.ShowMessageBox("Error", "Please select target device.");
-                exOccured = true;
+                errortype = 1;
             }
 
             // Store trace length
-            try
+            if (errortype == 0)
             {
-                _traceLength = (Convert.ToInt32(traceLengthHour.Text) * 60 + Convert.ToInt32(traceLengthMin.Text)) * 60;
-            }
-            catch (FormatException)
-            {
-                GlobalFunc.ShowMessageBox("Error", "Please input trace length in integer form.");
-                exOccured = true;
-            }
-            catch (OverflowException)
-            {
-                GlobalFunc.ShowMessageBox("Error", "Integer overflow: please input shorter trace length.");
-                exOccured = true;
+                try
+                {
+                    _traceLength = (Convert.ToInt32(traceLengthHour.Text) * 60 + Convert.ToInt32(traceLengthMin.Text)) * 60;
+                }
+                catch (FormatException)
+                {
+                    errortype = 2;
+                }
+                catch (OverflowException)
+                {
+                    errortype = 3;
+                }
             }
 
             // Store time window
-            try
+            if (errortype == 0)
             {
-                _timeWindow = Convert.ToInt32(timeWindow.Text);
-            }
-            catch (FormatException)
-            {
-                GlobalFunc.ShowMessageBox("Error", "Please input time window in integer form.");
-                exOccured = true;
-            }
-            catch (OverflowException)
-            {
-                GlobalFunc.ShowMessageBox("Error", "Integer overflow: please input shorter time window.");
-                exOccured = true;
+                try
+                {
+                    _timeWindow = Convert.ToInt32(timeWindow.Text);
+                }
+                catch (FormatException)
+                {
+                    errortype = 4;
+                }
+                catch (OverflowException)
+                {
+                    errortype = 5;
+                }
             }
 
             // Store block unit
-            try
+            if (errortype == 0)
             {
-                _blockUnit = Convert.ToInt32(blockUnit.Text);
-            }
-            catch (FormatException)
-            {
-                GlobalFunc.ShowMessageBox("Error", "Please input block unit in integer form.");
-                exOccured = true;
-            }
-            catch (OverflowException)
-            {
-                GlobalFunc.ShowMessageBox("Error", "Integer overflow: please input smaller block unit.");
-                exOccured = true;
+                try
+                {
+                    _blockUnit = Convert.ToInt32(blockUnit.Text);
+                }
+                catch (FormatException)
+                {
+                    errortype = 6;
+                }
+                catch (OverflowException)
+                {
+                    errortype = 7;
+                }
             }
 
-            if (!exOccured)
+            // Check for errors
+            if (errortype == 1)
+            {
+                GlobalFunc.ShowMessageBox("Error", "Please select target device.");
+            }
+            else if (errortype == 2)
+            {
+                GlobalFunc.ShowMessageBox("Error", "Please input trace length in integer form.");
+            }
+            else if (errortype == 3)
+            {
+                GlobalFunc.ShowMessageBox("Error", "Integer overflow: please input shorter trace length.");
+            }
+            else if (errortype == 4)
+            {
+                GlobalFunc.ShowMessageBox("Error", "Please input time window in integer form.");
+            }
+            else if (errortype == 5)
+            {
+                GlobalFunc.ShowMessageBox("Error", "Integer overflow: please input shorter time window.");
+            }
+            else if (errortype == 6)
+            {
+                GlobalFunc.ShowMessageBox("Error", "Please input block unit in integer form.");
+            }
+            else if (errortype == 7)
+            {
+                GlobalFunc.ShowMessageBox("Error", "Integer overflow: please input smaller block unit.");
+            }
+            else
             {
                 // Store above data as global preference
                 GlobalPref.setDeviceID(device);

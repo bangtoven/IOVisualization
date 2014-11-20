@@ -21,20 +21,47 @@ namespace ValtioClient
     /// <summary>
     /// Interaction logic for TracingIcon.xaml
     /// </summary>
-    public partial class TracingIcon
+    public partial class TracingIcon : INotifyPropertyChanged
     {
         private TaskbarIcon tb;
         private Stopwatch sw;
         private TimeSpan ts;
         BackgroundWorker bw = new BackgroundWorker();
 
+        // Used for data binding
+        private string _info;
+        public string Info
+        {
+            get { return _info; }
+            set
+            {
+                _info = value;
+                RaisePropertyChanged("Info");
+            }
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void RaisePropertyChanged(string p)
+        {
+            var handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(p));
+            }
+        }
+
         public TracingIcon()
         {
+            // Set DataContext for data binding
+            Info = "";
+            DataContext = this;
+
             InitializeComponent();
+
+            // DEBUG - set trace length to 30 seconds
+            GlobalPref.setTraceLength(30);
 
             // Set up tray icon
             tb = ValtioNotifyIcon;
-            tb.ToolTipText = "Tracing...\nClick to see progress";
 
             // Initialize stopwatch
             sw = new Stopwatch();
@@ -45,6 +72,7 @@ namespace ValtioClient
             bw.RunWorkerAsync();
         }
 
+        // Keeps track of time
         private void TrackTime(object sender, DoWorkEventArgs e)
         {
             sw.Start();
@@ -55,6 +83,7 @@ namespace ValtioClient
                 GlobalPref.timeElapsed = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
                 double frac = ts.TotalSeconds / GlobalPref.getTraceLength();
                 GlobalPref.donePercent = (int)(frac * 100);
+                Info = "Tracing...\nElapsed: " + GlobalPref.timeElapsed + "\nProgress: " + GlobalPref.donePercent + "%";
                 
                 Thread.Sleep(1);
 
@@ -65,6 +94,7 @@ namespace ValtioClient
             sw.Stop();
         }
 
+        // Called when background worker is complete
         private void StopTrace(object sender, RunWorkerCompletedEventArgs e)
         {
             Window MainWindow = new MainWindow();
@@ -84,16 +114,6 @@ namespace ValtioClient
         private void quitTrace_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
-        }
-
-        private void ValtioNotifyIcon_TrayToolTipOpen(object sender, RoutedEventArgs e)
-        {
-            tb.ToolTipText = "Tracing...\n" + "Elapsed: " + GlobalPref.timeElapsed + "\nProgress: " + GlobalPref.donePercent + "%";
-        }
-
-        private void ValtioNotifyIcon_TrayLeftMouseUp(object sender, RoutedEventArgs e)
-        {
-            // TODO: show notify box
         }
     }
 }

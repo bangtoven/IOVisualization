@@ -5,5 +5,9 @@
         xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls" x:Class="ValtioClient.MainWindow"
         Title="VALTIO" Height="600" Width="800" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
         TitleBarBackground="#42b5e8" TitleBarForeground="White">
-    <Grid/>
+    <extra:LoadingContent x:Name="RingLoadingContent" IsContentLoaded="False" Header="Preparing report">
+        <TextBlock HorizontalAlignment="Center" Margin="10"
+                           Text="RingLoadingContent Style"
+                           VerticalAlignment="Center"/>
+    </extra:LoadingContent>
 </extra:Window>
