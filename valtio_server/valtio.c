@@ -18,11 +18,6 @@ int main()
 void start() {
 	int result;	
 
-	signal(SIGINT, stop);
-	signal(SIGHUP, stop);
-	signal(SIGTERM, stop);
-	signal(SIGALRM, stop);
-
 	char* device;
 	char* stopTime;
 
@@ -40,6 +35,11 @@ void start() {
 	printf(" -device\t: %s\n -duration\t: %s\n",device,stopTime);
 	
 	// 3. start tracing
+	signal(SIGINT, stop);
+	signal(SIGHUP, stop);
+	signal(SIGTERM, stop);
+	signal(SIGALRM, stop);
+
 	printf("VALTIO: start blktrace\n");
 	result = startBlktrace(device, stopTime);
 	if (result != 0) {

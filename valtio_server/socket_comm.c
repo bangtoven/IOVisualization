@@ -35,26 +35,35 @@ int sendTraceToClient(struct blk_io_trace * t){
 }
 
 int getSettingFromClient(char** device, char** stopTime) {
+	int BUFSIZE = 100;
+	char buf[BUFSIZE];
+	bzero(buf, BUFSIZE);
+
+	int n;
+	int endIndex = 0;
+	while (1){
+		/* read: read input string from the client */
+		n = read(connfd, buf+endIndex, BUFSIZE-endIndex);
+		if (n < 0) {
+			perror("ERROR reading from socket");
+			return -1;
+		}
+		
+		if (buf[endIndex]=='\n') 
+			break;
+	
+		printf("server received %d bytes: %s", n, buf);
+	}
+	
+	printf("client sended: %s\n",buf);
+	
 	*device = "/dev/sda";
 	*stopTime = "500";
-	/* read: read input string from the client */
-	/*   bzero(buf, BUFSIZE);
-	n = read(connfd, buf, BUFSIZE);
-	if (n < 0) 
-	error("ERROR reading from socket");
-	printf("server received %d bytes: %s", n, buf);
-	*/    
-	/* write: echo the input string back to the client */
-	/*   n = write(connfd, buf, strlen(buf));
-	if (n < 0) 
-	error("ERROR writing to socket");
-	*/
+
 	return 0;
 }
 
 int openConnection() {
-	return 0;
-	
 	int listenfd; 					/* listening socket */
 	int clientlen; 					/* byte size of client's address */
 	struct sockaddr_in serveraddr; 	/* server's addr */
