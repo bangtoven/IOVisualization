@@ -2752,14 +2752,14 @@ int startBlktrace(char* device, char* stopTime)
 	args[i++] = stopTime;
 	args[i++] = "-o";
 	args[i++] = "-";
-	args[i++] = "-a";
-	args[i++] = "read";
-	args[i++] = "-a";
-	args[i++] = "write";
 	// args[i++] = "-a";
-	// args[i++] = "issue";
+	// args[i++] = "read";
 	// args[i++] = "-a";
-	// args[i++] = "complete";
+	// args[i++] = "write";
+	args[i++] = "-a";
+	args[i++] = "issue";
+	args[i++] = "-a";
+	args[i++] = "complete";
 		
 	return blk_main(argc, args);
 }

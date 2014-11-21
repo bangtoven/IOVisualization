@@ -90,6 +90,8 @@ enum blktrace_notify {
 #define BLK_IO_TRACE_MAGIC	0x65617400
 #define BLK_IO_TRACE_VERSION	0x07
 
+#define SE_STRUCT_SIZE 48
+
 /*
  * The trace itself
  */

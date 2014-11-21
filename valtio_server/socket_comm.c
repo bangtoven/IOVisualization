@@ -14,23 +14,17 @@ static int connfd;
 
 // static char *serial_buffer;
 int sendTraceToClient(struct blk_io_trace * t){	
-	if(t->sequence == 0)
+	if (t->sector == 0)
 		return 0;
 	
-	printf("#%10d\r",t->sequence);
+	printf("#%10d %ld\r",t->sequence,t->sector);
 	
-	// printf("콜백 받았음! %d %d %d \t%ld \t%ld\n",t->sequence,t->pid,t->action, t->sector, t->time);
-	// if (serial_buffer == NULL)
-	// 	serial_buffer = malloc(SE_STRUCT_SIZE);
-	// serializeIOTrace(t, serial_buffer); // t의 내용이 소켓통신 가능한 byte stream으로 serialize 되서 buffer에 저장됨.
-	//
-	// printf("send #%d trace\n",t->sequence);
-	//
-	// int n = write (connfd, t, SE_STRUCT_SIZE);
-	// if(n<0) {
-	// 	printf("Error writing to socket: %d\n",n);
-	// 	exit(-1);
-	// }
+	int n = write (connfd, t, SE_STRUCT_SIZE);
+	if(n<0) {
+		printf("Error writing to socket: %d\n",n);
+		return -1;
+	}
+	
 	return 0;
 }
 
@@ -48,11 +42,11 @@ int getSettingFromClient(char** device, char** stopTime) {
 			perror("ERROR reading from socket");
 			return -1;
 		}
+		printf("server received %d bytes", n);	
 		
-		if (buf[endIndex]=='\n') 
+		endIndex += n;
+		if (buf[endIndex-1]=='\n') 
 			break;
-	
-		printf("server received %d bytes: %s", n, buf);
 	}
 	
 	printf("client sended: %s\n",buf);
