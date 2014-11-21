@@ -1,0 +1,4 @@
+c:\users\복영빈\documents\visual studio 2010\Projects\valtio-client-getData\valtio-client-getData\bin\Debug\valtio-client-getData.exe
+c:\users\복영빈\documents\visual studio 2010\Projects\valtio-client-getData\valtio-client-getData\bin\Debug\valtio-client-getData.pdb
+c:\users\복영빈\documents\visual studio 2010\Projects\valtio-client-getData\valtio-client-getData\obj\x86\Debug\valtio-client-getData.exe
+c:\users\복영빈\documents\visual studio 2010\Projects\valtio-client-getData\valtio-client-getData\obj\x86\Debug\valtio-client-getData.pdb
