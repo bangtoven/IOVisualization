@@ -55,7 +55,7 @@
 #include "socket_comm.h"
 
 char* createString(char* src) {
-	int size = strlen(src);
+	int size = strlen(src)+1;
 	char *dst = malloc(size);
 	memcpy(dst,src,size);
 	return dst;
@@ -65,13 +65,11 @@ char* createString(char* src) {
 int blk_main(int argc, char *argv[]);
 int startBlktrace(char* device, int stopTime)
 {
-	printf("start blktrace\n");
-
 	char timeStr[8];
 	memset(timeStr,0,8);
 	sprintf(timeStr,"%d",stopTime);
 
-	int argc = 15;
+	int argc = 11;
 	char **args = malloc(sizeof(char*)*argc);
 	int i = 0;
 	args[i++] = createString("blktrace");
@@ -85,11 +83,12 @@ int startBlktrace(char* device, int stopTime)
 	args[i++] = createString("read");
 	args[i++] = createString("-a");
 	args[i++] = createString("write");
-	args[i++] = createString("-a");
-	args[i++] = createString("issue");
-	args[i++] = createString("-a");
-	args[i++] = createString("complete");
+	// args[i++] = createString("-a");
+	// args[i++] = createString("issue");
+	// args[i++] = createString("-a");
+	// args[i++] = createString("complete");
 	
+	printf("start blktrace\n");
 	return blk_main(argc, args);
 }
 // --------------------------------- VALTIO team. 
@@ -1425,16 +1424,16 @@ static int handle_list_file(struct tracer_devpath_head *hd, struct list_head *li
 			t = (struct blk_io_trace *)(tbp->buf + off);
 			t_len = sizeof(*t) + t->pdu_len;
 
+			if (off + t_len > tbp->len)
+				break;
+			
 			// added by Jungho Bang. 2014. 11. 7. VALTIO team. 
 			int ret = sendTraceToSocket(t);
 			if (ret < 0) {
 				printf("VALTIO socket error.");
-				exit_tracing();
+				alarm(1);
 			}
 			
-			if (off + t_len > tbp->len)
-				break;
-
 			off += t_len;
 			nevents++;
 		}
@@ -2006,10 +2005,10 @@ static void wait_tracers(void)
 
 static void exit_tracing(void)
 {
-	signal(SIGINT, SIG_IGN);
-	signal(SIGHUP, SIG_IGN);
-	signal(SIGTERM, SIG_IGN);
-	signal(SIGALRM, SIG_IGN);
+	// signal(SIGINT, SIG_IGN);
+	// signal(SIGHUP, SIG_IGN);
+	// signal(SIGTERM, SIG_IGN);
+	// signal(SIGALRM, SIG_IGN);
 
 	stop_tracers();
 	wait_tracers();
@@ -2017,11 +2016,18 @@ static void exit_tracing(void)
 	rel_devpaths();
 }
 
-static void handle_sigint(__attribute__((__unused__)) int sig)
+// static void handle_sigint(__attribute__((__unused__)) int sig)
+// {
+// 	done = 1;
+// 	stop_tracers();
+// }
+
+void stopBlktrace() 
 {
 	done = 1;
-	stop_tracers();
+	exit_tracing();	
 }
+
 
 static void show_stats(struct list_head *devpaths)
 {
@@ -2712,6 +2718,12 @@ int blk_main(int argc, char *argv[])
 {
 	int ret = 0;
 
+	int ii;
+	for (ii=0; ii<argc; ii++) {
+		printf("%s ",argv[ii]);
+	}
+	printf("\n");
+
 	setlocale(LC_NUMERIC, "en_US");
 	pagesize = getpagesize();
 	ncpus = sysconf(_SC_NPROCESSORS_CONF);
@@ -2724,6 +2736,12 @@ int blk_main(int argc, char *argv[])
 		ret = 1;
 		goto out;
 	}
+	
+	int i;
+	for (i=0; i<argc; i++) {
+		free(argv[i]);
+	}
+	free(argv);
 
 	if (ndevs > 1 && output_name && strcmp(output_name, "-") != 0) {
 		fprintf(stderr, "-o not supported with multiple devices\n");
@@ -2731,10 +2749,10 @@ int blk_main(int argc, char *argv[])
 		goto out;
 	}
 
-	signal(SIGINT, handle_sigint);
-	signal(SIGHUP, handle_sigint);
-	signal(SIGTERM, handle_sigint);
-	signal(SIGALRM, handle_sigint);
+	// signal(SIGINT, handle_sigint);
+	// signal(SIGHUP, handle_sigint);
+	// signal(SIGTERM, handle_sigint);
+	// signal(SIGALRM, handle_sigint);
 	signal(SIGPIPE, SIG_IGN);
 
 	if (kill_running_trace) {

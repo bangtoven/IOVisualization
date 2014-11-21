@@ -15,7 +15,10 @@ int openConnection() {
 
 // static char *serial_buffer;
 int sendTraceToSocket(struct blk_io_trace * t){	
-	printf("콜백 받았음! %d\n",t->sequence);
+	if(t->sequence == 0)
+		return 0;
+	
+	printf("콜백 받았음! %d %d %d \t%ld \t%ld\n",t->sequence,t->pid,t->action, t->sector, t->time);
 	// // if (serial_buffer == NULL)
 // 		// serial_buffer = malloc(SE_STRUCT_SIZE);
 // 	// serializeIOTrace(t, serial_buffer); // t의 내용이 소켓통신 가능한 byte stream으로 serialize 되서 buffer에 저장됨.
@@ -47,7 +50,7 @@ void error (char *msg){
 void asdfasdf() {
 	
 	int listenfd; /* listening socket */
-	//int connfd; /* connection socket */
+	int connfd; /* connection socket */
 	int portno; /* port to listen on */
 	int clientlen; /* byte size of client's address */
 	struct sockaddr_in serveraddr; /* server's addr */
