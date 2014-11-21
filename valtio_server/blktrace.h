@@ -25,7 +25,7 @@
 #define t_kb(t)		((t)->bytes >> 10)
 #define t_b(t)		((t)->bytes & 1023)
 
-int startBlktrace(char* device, int stopTime);
+int startBlktrace(char* device, char* stopTime);
 void stopBlktrace();
 
 typedef __u32 u32;

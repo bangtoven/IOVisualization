@@ -54,45 +54,6 @@
 #include "blktrace.h"
 #include "socket_comm.h"
 
-char* createString(char* src) {
-	int size = strlen(src)+1;
-	char *dst = malloc(size);
-	memcpy(dst,src,size);
-	return dst;
-}
-
-// added by Jungho Bang. 2014. 11. 7. VALTIO team. 
-int blk_main(int argc, char *argv[]);
-int startBlktrace(char* device, int stopTime)
-{
-	char timeStr[8];
-	memset(timeStr,0,8);
-	sprintf(timeStr,"%d",stopTime);
-
-	int argc = 11;
-	char **args = malloc(sizeof(char*)*argc);
-	int i = 0;
-	args[i++] = createString("blktrace");
-	args[i++] = createString("-d");
-	args[i++] = createString(device);
-	args[i++] = createString("-w");
-	args[i++] = createString(timeStr);
-	args[i++] = createString("-o");
-	args[i++] = createString("-");
-	args[i++] = createString("-a");
-	args[i++] = createString("read");
-	args[i++] = createString("-a");
-	args[i++] = createString("write");
-	// args[i++] = createString("-a");
-	// args[i++] = createString("issue");
-	// args[i++] = createString("-a");
-	// args[i++] = createString("complete");
-	
-	printf("start blktrace\n");
-	return blk_main(argc, args);
-}
-// --------------------------------- VALTIO team. 
-
 /*
 * You may want to increase this even more, if you are logging at a high
 * rate and see skipped/missed events
@@ -1428,7 +1389,7 @@ static int handle_list_file(struct tracer_devpath_head *hd, struct list_head *li
 				break;
 			
 			// added by Jungho Bang. 2014. 11. 7. VALTIO team. 
-			int ret = sendTraceToSocket(t);
+			int ret = sendTraceToClient(t);
 			if (ret < 0) {
 				printf("VALTIO socket error.");
 				alarm(1);
@@ -2737,12 +2698,6 @@ int blk_main(int argc, char *argv[])
 		goto out;
 	}
 	
-	int i;
-	for (i=0; i<argc; i++) {
-		free(argv[i]);
-	}
-	free(argv);
-
 	if (ndevs > 1 && output_name && strcmp(output_name, "-") != 0) {
 		fprintf(stderr, "-o not supported with multiple devices\n");
 		ret = 1;
@@ -2782,4 +2737,29 @@ out:
 	rel_devpaths();
 
 	return ret;
+}
+
+// added by Jungho Bang. VALTIO team. 
+int startBlktrace(char* device, char* stopTime)
+{
+	int argc = 11;
+	char **args = malloc(sizeof(char*)*argc);
+	int i = 0;
+	args[i++] = "blktrace";
+	args[i++] = "-d";
+	args[i++] = device;
+	args[i++] = "-w";
+	args[i++] = stopTime;
+	args[i++] = "-o";
+	args[i++] = "-";
+	args[i++] = "-a";
+	args[i++] = "read";
+	args[i++] = "-a";
+	args[i++] = "write";
+	// args[i++] = "-a";
+	// args[i++] = "issue";
+	// args[i++] = "-a";
+	// args[i++] = "complete";
+		
+	return blk_main(argc, args);
 }

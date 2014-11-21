@@ -4,7 +4,8 @@
 #include "blktrace_api.h"
 
 int openConnection();
-int sendTraceToSocket(struct blk_io_trace*);
-int closeConnection();
+int getSettingFromClient(char** device, char** stopTime);
+int sendTraceToClient(struct blk_io_trace*);
+void closeConnection();
 
 #endif
