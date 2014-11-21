@@ -27,6 +27,10 @@ namespace ValtioClient
         private Stopwatch sw;
         private TimeSpan ts;
         BackgroundWorker bw = new BackgroundWorker();
+        private int tl = GlobalPref.getTraceLength();
+        private int tl_hours = 0;
+        private int tl_minutes = 0;
+        private int tl_seconds = 0;
 
         // Used for data binding
         private string _info;
@@ -51,6 +55,11 @@ namespace ValtioClient
 
         public TracingIcon()
         {
+            // Save trace length
+            tl_hours = tl / 3600;
+            tl_minutes = (tl - tl_hours * 3600) / 60;
+            tl_seconds = tl - tl_hours * 3600 - tl_minutes * 60;
+
             // Set DataContext for data binding
             Info = "";
             DataContext = this;
@@ -81,9 +90,9 @@ namespace ValtioClient
             {
                 ts = sw.Elapsed;
                 GlobalPref.timeElapsed = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                double frac = ts.TotalSeconds / GlobalPref.getTraceLength();
+                double frac = ts.TotalSeconds / tl;
                 GlobalPref.donePercent = (int)(frac * 100);
-                Info = "Tracing...\nElapsed: " + GlobalPref.timeElapsed + "\nProgress: " + GlobalPref.donePercent + "%";
+                Info = "Tracing...\nTrace Length: " + String.Format("{0:00}:{1:00}:{2:00}:{3:00}", tl_hours, tl_minutes, tl_seconds, 0) + "\nElapsed: " + GlobalPref.timeElapsed + "\nProgress: " + GlobalPref.donePercent + "%";
                 
                 Thread.Sleep(1);
 

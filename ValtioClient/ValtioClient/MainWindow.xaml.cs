@@ -23,5 +23,10 @@ namespace ValtioClient
         {
             InitializeComponent();
         }
+
+        private void processList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }
