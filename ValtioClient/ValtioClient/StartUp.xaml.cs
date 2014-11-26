@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.ComponentModel;
+using System.Data;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+
 
 namespace ValtioClient
 {
@@ -45,6 +50,13 @@ namespace ValtioClient
             // Prepare and show environment setup window
             Window envSetup = new EnvSetup();
             envSetup.Show();
+            this.Close();
+        }
+
+        private void debugBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Window oxyTest = new OxyTest();
+            oxyTest.Show();
             this.Close();
         }
     }

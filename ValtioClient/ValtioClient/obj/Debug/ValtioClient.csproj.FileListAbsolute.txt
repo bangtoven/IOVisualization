@@ -42,3 +42,16 @@ C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debu
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\System.Reactive.Windows.Threading.xml
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\System.Windows.Interactivity.xml
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\Microsoft.Expression.Drawing.xml
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\OxyTest.baml
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\OxyTest.g.cs
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\OxyPlot.dll
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\OxyPlot.Wpf.dll
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\OxyPlot.Xps.dll
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\OxyPlot.pdb
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\OxyPlot.xml
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\OxyPlot.Wpf.pdb
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\OxyPlot.Wpf.xml
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\OxyPlot.Xps.pdb
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\OxyPlot.Xps.xml
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\GeneratedInternalTypeHelper.g.cs
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\ValtioClient_MarkupCompile.lref

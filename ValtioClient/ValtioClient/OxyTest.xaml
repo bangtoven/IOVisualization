@@ -1,0 +1,15 @@
+﻿<extra:Window x:Class="ValtioClient.OxyTest"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:extra="http://schemas.extra.com/ui"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        xmlns:local="clr-namespace:ValtioClient"
+        Title="VALTIO" Height="600" Width="800" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
+        TitleBarBackground="#42b5e8" TitleBarForeground="White">
+    <Window.DataContext>
+        <local:MainViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <oxy:PlotView Model="{Binding MyModel}"/>
+    </Grid>
+</extra:Window>
