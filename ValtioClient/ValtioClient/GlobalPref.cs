@@ -9,6 +9,7 @@ namespace ValtioClient
     /* Stores global preference set by the user */
     public static class GlobalPref
     {
+        private static bool debug = false; // Flag used for debugging
         private static String serverIP = null;
         private static String serverPort = null;
         private static String deviceID = null;
