@@ -1,0 +1,24 @@
+﻿<extra:Window x:Class="ValtioClient.SelectMenu"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:extra="http://schemas.extra.com/ui"
+        Title="VALTIO" Height="200" Width="400" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
+        TitleBarBackground="#42b5e8" TitleBarForeground="White">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="2*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+            <Button Margin="0,0,10,0" Width="100" Height="30" Content="Addr/Freq" Click="Button_Click"></Button>
+            <Button Width="100" Height="30" Content="Time/Addr" Click="Button_Click_1"></Button>
+            <Button Margin="10,0,0,0" Width="100" Height="30" Content="Time/Freq" Click="Button_Click_2"></Button>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Row="2">
+            <Button Margin="0,0,10,0" Width="100" Height="30" Content="Lat/Freq" Click="Button_Click_3"></Button>
+            <Button Width="100" Height="30" Content="Time/Lat-avg" Click="Button_Click_4"></Button>
+            <Button Margin="10,0,0,0" Width="100" Height="30" Content="Throughput" Click="Button_Click_5"></Button>
+        </StackPanel>
+    </Grid>
+</extra:Window>

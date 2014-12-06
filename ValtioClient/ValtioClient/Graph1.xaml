@@ -1,4 +1,4 @@
-﻿<extra:Window x:Class="ValtioClient.OxyTest"
+﻿<extra:Window x:Class="ValtioClient.Graph1"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:extra="http://schemas.extra.com/ui"

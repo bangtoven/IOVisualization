@@ -13,9 +13,8 @@
                 <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
             <StackPanel Orientation="Vertical">
-                <Label Content="Select device" HorizontalAlignment="Center" FontWeight="Bold"/>
-                <ListBox x:Name="deviceList" Margin="0,10,0,0" HorizontalAlignment="Center"  Width="120" Height="150" BorderBrush="LightGray" BorderThickness="1"
-                             ScrollViewer.HorizontalScrollBarVisibility="Auto" SelectionChanged="deviceList_SelectionChanged"/>
+                <Label Content="Target device" HorizontalAlignment="Center" FontWeight="Bold"/>
+                <TextBox x:Name="targetDevice" Margin="0,10,0,0" HorizontalAlignment="Center" Height="23"  TextWrapping="Wrap" Width="150" VerticalAlignment="Center"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Grid.Column="1">
                 <Label Content="Trace length" HorizontalAlignment="Center" VerticalAlignment="Top" FontWeight="Bold"/>

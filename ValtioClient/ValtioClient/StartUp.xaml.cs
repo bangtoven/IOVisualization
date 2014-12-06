@@ -35,29 +35,43 @@ namespace ValtioClient
 
         private void connectBtn_Click(object sender, RoutedEventArgs e)
         {
-            _serverIP = serverIP.Text;
-            _serverPort = serverPort.Text;
-            if (_serverIP == null || _serverIP == "" || _serverPort == null || _serverPort == "")
+            if (GlobalPref.debug)
             {
-                GlobalFunc.ShowMessageBox("Error", "Please input both the server's IP address and port.");
-                return;
+                _serverIP = "192.168.142.130";
+                _serverPort = "8462";
+            }
+            else
+            {
+                _serverIP = serverIP.Text;
+                _serverPort = serverPort.Text;
+                if (_serverIP == null || _serverIP == "" || _serverPort == null || _serverPort == "")
+                {
+                    GlobalFunc.ShowMessageBox("Error", "Please input both the server's IP address and port.");
+                    return;
+                }
             }
 
             // Store server IP and port as global preference
             GlobalPref.setServerIP(_serverIP);
             GlobalPref.setServerPort(_serverPort);
 
-            // Prepare and show environment setup window
-            Window envSetup = new EnvSetup();
-            envSetup.Show();
-            this.Close();
-        }
+            GlobalPref.m_ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(GlobalPref.getServerIP()), Convert.ToInt32(GlobalPref.getServerPort())); //포트 대기 설정
+            // Port: 8462
 
-        private void debugBtn_Click(object sender, RoutedEventArgs e)
-        {
-            Window oxyTest = new OxyTest();
-            oxyTest.Show();
-            this.Close();
+            try
+            {
+                GlobalPref.m_ClientSocket.Connect(ipep);
+
+                // Prepare and show environment setup window
+                Window envSetup = new EnvSetup();
+                envSetup.Show();
+                this.Close();
+            }
+            catch (SocketException)
+            {
+                GlobalFunc.ShowMessageBox("Error", "Unable to connect to server.");
+            }
         }
     }
 }

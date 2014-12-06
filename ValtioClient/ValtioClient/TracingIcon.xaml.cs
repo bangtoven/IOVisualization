@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Diagnostics;
 using Hardcodet.Wpf.TaskbarNotification;
+using System.Net.Sockets;
 
 namespace ValtioClient
 {
@@ -55,6 +56,7 @@ namespace ValtioClient
 
         public TracingIcon()
         {
+
             // Save trace length
             tl_hours = tl / 3600;
             tl_minutes = (tl - tl_hours * 3600) / 60;
@@ -66,7 +68,7 @@ namespace ValtioClient
 
             InitializeComponent();
 
-            // DEBUG - set trace length to 30 seconds
+            // DEBUG
             GlobalPref.setTraceLength(30);
 
             // Set up tray icon
@@ -77,8 +79,22 @@ namespace ValtioClient
 
             // Use background worker thread to track elapsed time
             bw.DoWork += new DoWorkEventHandler(TrackTime);
-            bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(StopTrace);
+            bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bwComplete);
             bw.RunWorkerAsync();
+
+            // Give preference to server
+            byte[] message = Encoding.ASCII.GetBytes(GlobalPref.getDeviceID() + "," + GlobalPref.getTraceLength() + "\n"); // "/dev/sda,15\n"
+            GlobalPref.m_ClientSocket.Send(message);
+
+            SocketAsyncEventArgs arg = new SocketAsyncEventArgs();
+            GlobalPref.szData = new byte[10000]; //5000
+            arg.SetBuffer(GlobalPref.szData, 0, 9600); //4096
+            arg.UserToken = GlobalPref.m_ClientSocket;
+            ReceiveData rd = new ReceiveData();
+            rd.tracingIcon = this;
+            arg.Completed
+                += new EventHandler<SocketAsyncEventArgs>(rd.getData);
+            GlobalPref.m_ClientSocket.ReceiveAsync(arg);
         }
 
         // Keeps track of time
@@ -90,6 +106,7 @@ namespace ValtioClient
             {
                 ts = sw.Elapsed;
                 GlobalPref.timeElapsed = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                GlobalPref.timeElapsedInt = Convert.ToInt32(ts.TotalSeconds);
                 double frac = ts.TotalSeconds / tl;
                 GlobalPref.donePercent = (int)(frac * 100);
                 Info = "Tracing...\nTrace Length: " + String.Format("{0:00}:{1:00}:{2:00}:{3:00}", tl_hours, tl_minutes, tl_seconds, 0) + "\nElapsed: " + GlobalPref.timeElapsed + "\nProgress: " + GlobalPref.donePercent + "%";
@@ -104,22 +121,21 @@ namespace ValtioClient
         }
 
         // Called when background worker is complete
-        private void StopTrace(object sender, RunWorkerCompletedEventArgs e)
+        private void bwComplete(object sender, RunWorkerCompletedEventArgs e)
         {
-            Window MainWindow = new MainWindow();
-            MainWindow.Show();
+            // Do something if need be
+        }
+
+        // Stop tracing
+        public void StopTrace()
+        {
+            Window SelectMenu = new SelectMenu();
+            SelectMenu.Show();
             tb.Dispose();
             this.Close();
         }
 
-        private void stopTrace_Click(object sender, RoutedEventArgs e)
-        {
-            Window MainWindow = new MainWindow();
-            MainWindow.Show();
-            tb.Dispose();
-            this.Close();
-        }
-
+        // Exit program
         private void quitTrace_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();

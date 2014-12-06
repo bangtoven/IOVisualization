@@ -3,14 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:extra="http://schemas.extra.com/ui"
         xmlns:tb="http://www.hardcodet.net/taskbar" ShowInTaskbar="False" ResizeMode="NoResize"
-        TitleBarBackground="#42b5e8" WindowState="Minimized" TitleBarForeground="White">
+        TitleBarBackground="#42b5e8" Visibility="Hidden" WindowState="Minimized"  TitleBarForeground="White">
     <tb:TaskbarIcon x:Name="ValtioNotifyIcon"
                         DataContext="{Binding Path=Info}"
         IconSource="Resources/valtio.ico"
         ToolTipText="{Binding}">
         <tb:TaskbarIcon.ContextMenu>
             <ContextMenu>
-                <MenuItem x:Name="stopTrace" Header="Stop Tracing" Click="stopTrace_Click" />
                 <MenuItem x:Name="quitTrace" Header="Quit" Click="quitTrace_Click" />
             </ContextMenu>
         </tb:TaskbarIcon.ContextMenu>
