@@ -11,7 +11,7 @@
 #include <netinet/in.h>
 #include <netdb.h> 
 
-#include "../server/serialization.h"
+#include "serialization.h"
 
 #define BUFSIZE 1024
 
@@ -27,12 +27,12 @@ int main(int argc, char **argv) {
 	char *hostname;
 
 	/* check command line arguments */
-	if (argc != 3) {
-		fprintf(stderr,"usage: %s <hostname> <port>\n", argv[0]);
-		exit(0);
-	}
-	hostname = argv[1];
-	portno = atoi(argv[2]);
+	// if (argc != 3) {
+	// 	fprintf(stderr,"usage: %s <hostname> <port>\n", argv[0]);
+	// 	exit(0);
+	// }
+	hostname = "10.211.55.15";
+	portno = "8462";
 
 	/* socket: create the socket */
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -56,6 +56,8 @@ int main(int argc, char **argv) {
 	/* connect: create a connection with the server */
 	if (connect(sockfd, (const struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0) 
 		error("ERROR connecting");
+
+	write(sockfd,"/dev/sda,500",12);
 
 	/* read: print the server's reply */
 	char buffer[BUFSIZE];

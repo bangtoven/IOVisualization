@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>4C9CFF18-4C2D-418D-996B-7CC9E46F57CF</string>
+	<key>IDESourceControlProjectName</key>
+	<string>valtio-server</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>F06676DB7E94C3D0FB7E31F2EA471A24187974AF</key>
+		<string>https://github.com/bangtoven/IOVisualization.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>valtio_server/valtio-server.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>F06676DB7E94C3D0FB7E31F2EA471A24187974AF</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/bangtoven/IOVisualization.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>F06676DB7E94C3D0FB7E31F2EA471A24187974AF</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>F06676DB7E94C3D0FB7E31F2EA471A24187974AF</string>
+			<key>IDESourceControlWCCName</key>
+			<string>IOVisualization</string>
+		</dict>
+	</array>
+</dict>
+</plist>

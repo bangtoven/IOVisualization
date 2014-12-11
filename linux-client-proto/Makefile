@@ -4,10 +4,13 @@ CFLAGS=-c -Wall
 all: echoclient
 
 echoclient: echoclient.o
-	$(CC) echoclient.o ../server/serialization.o -o echoclient
+	$(CC) echoclient.o serialization.o -o echoclient
 
 echoclient.o: echoclient.c
 	$(CC) $(CFLAGS) echoclient.c 
+	
+serialization.o: serialization.c
+	$(CC) $(CFLAGS) serialization.c 
 
 clean:
 	rm -rf *o echoclient
