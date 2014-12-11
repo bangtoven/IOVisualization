@@ -13,7 +13,7 @@
 
 #include "serialization.h"
 
-#define BUFSIZE 1024
+#define BUFSIZE 480
 
 void error(char *msg) {
 	perror(msg);
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 	if (connect(sockfd, (const struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0) 
 		error("ERROR connecting asdfasfdafds");
 
-	write(sockfd,"/dev/sda,500\n",13);
+	write(sockfd,"/dev/sda,10\n",12);
 
 	/* read: print the server's reply */
 	char buffer[BUFSIZE];
@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
 			printf("pid:%8u\t", t.pid);
 			printf("bytes:%8u\t", t.bytes);
 			printf("sector:%llu\t", (unsigned long long) t.sector);
-			printf("\n");
+			printf("\r");
 			
 			offset += SE_STRUCT_SIZE; // struct size 만큼 돌면서 계속 진행.
 		}

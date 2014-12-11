@@ -1356,6 +1356,9 @@ static void exit_tracing(void);
 
 static int handle_list_file(struct tracer_devpath_head *hd, struct list_head *list)
 {
+    if (socketError != 0)
+        return 0;
+    
 	int off, t_len, nevents;
 	struct blk_io_trace *t;
 	struct list_head *p, *q;
@@ -1364,6 +1367,10 @@ static int handle_list_file(struct tracer_devpath_head *hd, struct list_head *li
 
 	prev = hd->prev;
 	list_for_each_safe(p, q, list) {
+        
+        if (socketError != 0)
+            break;
+        
 		tbp = list_entry(p, struct trace_buf, head);
 		list_del(&tbp->head);
 		entries_handled++;
@@ -1391,8 +1398,9 @@ static int handle_list_file(struct tracer_devpath_head *hd, struct list_head *li
 			// added by Jungho Bang. 2014. 11. 7. VALTIO team. 
 			int ret = sendTraceToClient(t);
 			if (ret < 0) {
-				printf("VALTIO socket error.");
+				printf("VALTIO socket error.\n");
 				alarm(1);
+                break;
 			}
 			
 			off += t_len;

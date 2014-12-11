@@ -21,6 +21,7 @@ int sendTraceToClient(struct blk_io_trace * t){
 	
 	int n = write (connfd, t, SE_STRUCT_SIZE);
 	if(n<0) {
+        socketError = 1;
 		printf("Error writing to socket: %d\n",n);
 		return -1;
 	}
@@ -119,7 +120,6 @@ int openConnection() {
 
 	/* gethostbyaddr: determine who sent the message */
 	hostaddrp = inet_ntoa(clientaddr.sin_addr);
-	printf("client addr: %s\n",hostaddrp);
 	hostp = gethostbyname(hostaddrp);//, clientlen, AF_INET);
 	if (hostp == NULL) {
 		perror("ERROR on gethostbyaddr");
@@ -131,6 +131,8 @@ int openConnection() {
 	}
 
 	printf("server established connection with %s (%s)\n", hostp->h_name, hostaddrp);
+    socketError = 0;
+    
 	return 0;
 }
 

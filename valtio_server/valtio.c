@@ -22,12 +22,14 @@ void start() {
 	char* stopTime;
 
 	// 1. open connection
+    printf("\n==================================\n");
 	printf("VALTIO: start socket connection\n");
 	result = openConnection();
 	if (result!=0) 
 		return;
 
 	// 2. set settings
+    printf("\n==================================\n");
 	printf("VALTIO: get settings from client\n");
 	result = getSettingFromClient(&device, &stopTime);
 	if (result!=0)
@@ -40,6 +42,7 @@ void start() {
 	signal(SIGTERM, stop);
 	signal(SIGALRM, stop);
 
+    printf("\n==================================\n");
 	printf("VALTIO: start blktrace\n");
 	result = startBlktrace(device, stopTime);
 	if (result != 0) {
@@ -57,6 +60,7 @@ void stop(__attribute__((__unused__)) int sig) {
 	stopBlktrace();
 	closeConnection();
 	
+    printf("\n\n==================================\n");
 	printf("VALTIO: valtio server finished\n");
 	exit(0);
 }
