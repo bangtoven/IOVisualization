@@ -27,12 +27,11 @@ int sendTraceToClient(struct blk_io_trace * b){
 	if (b->sector == 0)
 		return 0;
 	
-//    struct valtio_trace *t = ((void*)b)+8;
-//    t->sequence = b->sequence;
-//    printf("#%10d %lu\n",t->pid,(long unsigned int)t->sector);
-    printf("#%10d %lu\n",b->pid,(long unsigned int)b->sector);
+    struct valtio_trace *t = ((void*)b)+8;
+//    t->dontcare = b->sequence;
+    printf("#%10d %lu\n",t->pid,(long unsigned int)t->sector);
     
-	int n = write (connfd, ((void*)b)+8, 32);
+	int n = write (connfd, t, 32);
 	if(n<0) {
         socketError = 1;
         alarm(1);
