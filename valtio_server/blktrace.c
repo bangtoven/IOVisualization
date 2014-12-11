@@ -1401,7 +1401,7 @@ static int handle_list_file(struct tracer_devpath_head *hd, struct list_head *li
 			// added by Jungho Bang. 2014. 11. 7. VALTIO team. 
 			int ret = sendTraceToClient(t);
 			if (ret < 0) {
-				printf("!Error writing to socket\n");
+//				printf("!Error writing to socket\n");
                 break;
 			}
 			

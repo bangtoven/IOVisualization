@@ -13,7 +13,7 @@
 
 #include "serialization.h"
 
-#define BUFSIZE 480
+#define BUFSIZE 320
 
 void error(char *msg) {
 	perror(msg);
@@ -76,12 +76,11 @@ int main(int argc, char **argv) {
 			
 			struct blk_io_trace t = deserializeIOTrace(buffer, offset); // structure 부활ㅋ
 			
-			printf("seq:%u\t", t.sequence);
-			printf("pid:%8u\t", t.pid);
-			printf("bytes:%8u\t", t.bytes);
-			printf("sector:%llu\t", (unsigned long long) t.sector);
-			printf("\r");
-			
+//			printf("seq:%u\t", t.sequence);
+//			printf("sector:%llu\t", (unsigned long long) t.sector);
+//			printf("\n");
+            printf("#%10d %lu\n",t.pid,(long unsigned int)t.sector);
+            
 			offset += SE_STRUCT_SIZE; // struct size 만큼 돌면서 계속 진행.
 		}
 		endIndex = bufferedLength % SE_STRUCT_SIZE;		

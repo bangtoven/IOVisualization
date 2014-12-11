@@ -15,6 +15,7 @@
 		732F637A1A395C7000AB3A16 /* serialization.c in Sources */ = {isa = PBXBuildFile; fileRef = 732F63701A395C7000AB3A16 /* serialization.c */; };
 		732F637B1A395C7000AB3A16 /* socket_comm.c in Sources */ = {isa = PBXBuildFile; fileRef = 732F63721A395C7000AB3A16 /* socket_comm.c */; };
 		732F637C1A395C7000AB3A16 /* valtio.c in Sources */ = {isa = PBXBuildFile; fileRef = 732F63741A395C7000AB3A16 /* valtio.c */; };
+		732F63811A39920100AB3A16 /* daemon.c in Sources */ = {isa = PBXBuildFile; fileRef = 732F63801A39920100AB3A16 /* daemon.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -47,6 +48,7 @@
 		732F63741A395C7000AB3A16 /* valtio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = valtio.c; sourceTree = SOURCE_ROOT; };
 		732F637E1A3963E800AB3A16 /* linux-client-proto */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "linux-client-proto"; path = "../linux-client-proto"; sourceTree = "<group>"; };
 		732F637F1A39657400AB3A16 /* issue.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = issue.txt; sourceTree = SOURCE_ROOT; };
+		732F63801A39920100AB3A16 /* daemon.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = daemon.c; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +97,7 @@
 				732F63731A395C7000AB3A16 /* socket_comm.h */,
 				732F63741A395C7000AB3A16 /* valtio.c */,
 				732F637F1A39657400AB3A16 /* issue.txt */,
+				732F63801A39920100AB3A16 /* daemon.c */,
 			);
 			path = "valtio-server";
 			sourceTree = "<group>";
@@ -159,6 +162,7 @@
 				732F637A1A395C7000AB3A16 /* serialization.c in Sources */,
 				732F63751A395C7000AB3A16 /* act_mask.c in Sources */,
 				732F63771A395C7000AB3A16 /* devices.c in Sources */,
+				732F63811A39920100AB3A16 /* daemon.c in Sources */,
 				732F63781A395C7000AB3A16 /* Makefile in Sources */,
 				732F63761A395C7000AB3A16 /* blktrace.c in Sources */,
 				732F63791A395C7000AB3A16 /* rbtree.c in Sources */,

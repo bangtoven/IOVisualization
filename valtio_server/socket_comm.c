@@ -7,19 +7,32 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <stdio.h>
+#include <asm/types.h>
 #include "socket_comm.h"
 
 #define VALTIO_PORT 8462
 static int connfd;
 
+struct valtio_trace {
+    __u64 time;		
+    __u64 sector;	
+    __u32 bytes;	
+    __u32 action;	
+    __u32 pid;		
+    __u32 dontcare;	// can be used as sequence
+};
+
 // static char *serial_buffer;
-int sendTraceToClient(struct blk_io_trace * t){	
-	if (t->sector == 0)
+int sendTraceToClient(struct blk_io_trace * b){
+	if (b->sector == 0)
 		return 0;
 	
-	printf("#%10d %lu\r",t->sequence,(long unsigned int)t->sector);
-	
-	int n = write (connfd, t, SE_STRUCT_SIZE);
+//    struct valtio_trace *t = ((void*)b)+8;
+//    t->sequence = b->sequence;
+//    printf("#%10d %lu\n",t->pid,(long unsigned int)t->sector);
+    printf("#%10d %lu\n",b->pid,(long unsigned int)b->sector);
+    
+	int n = write (connfd, ((void*)b)+8, 32);
 	if(n<0) {
         socketError = 1;
         alarm(1);
