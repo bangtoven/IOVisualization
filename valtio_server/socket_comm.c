@@ -35,7 +35,8 @@ int getSettingFromClient(char** device, char** stopTime) {
 
 	int n;
 	int endIndex = 0;
-	while (1){
+    int try = 10;
+	while (try-- > 0){
 		/* read: read input string from the client */
 		n = read(connfd, buf+endIndex, BUFSIZE-endIndex);
 		if (n < 0) {

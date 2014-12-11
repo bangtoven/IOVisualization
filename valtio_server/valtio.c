@@ -30,7 +30,7 @@ void start() {
 	// 1. open connection
     printf("\n==================================\n");
     printTime();
-	printf("start socket connection\n");
+	printf("Start socket connection\n");
 	result = openConnection();
 	if (result!=0) 
 		return;
@@ -38,21 +38,19 @@ void start() {
 	// 2. set settings
     printf("\n==================================\n");
     printTime();
-    printf("get settings from client\n");
+    printf("Get settings from client\n");
 	result = getSettingFromClient(&device, &stopTime);
 	if (result!=0)
 		return;
 	printf(" -device\t: %s\n -duration\t: %s\n",device,stopTime);
 	
 	// 3. start tracing
-	signal(SIGINT, stop);
-	signal(SIGHUP, stop);
-	signal(SIGTERM, stop);
-	signal(SIGALRM, stop);
-
-    printf("\n==================================\n");
-	printf("start blktrace\n");
-	result = startBlktrace(device, stopTime);
+	printf("Start blktrace\n");
+    signal(SIGINT, stop);
+    signal(SIGHUP, stop);
+    signal(SIGTERM, stop);
+    signal(SIGALRM, stop);
+    result = startBlktrace(device, stopTime);
 	if (result != 0) {
         signal(SIGINT, SIG_IGN);
         signal(SIGHUP, SIG_IGN);
@@ -75,6 +73,6 @@ void stop(__attribute__((__unused__)) int sig) {
 	
     printf("\n\n==================================\n");
 	printTime();
-    printf("valtio server finished\n\n");
+    printf("Valtio server finished\n\n");
 	exit(0);
 }
