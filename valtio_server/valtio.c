@@ -1,12 +1,18 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <signal.h>
+#include <time.h>
 
 #include "blktrace.h"
 #include "socket_comm.h"
 
 void start();
 void stop(__attribute__((__unused__)) int sig);
+void printTime() {
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    printf("%d-%d-%d %d:%d:%d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+}
 
 int main()
 {
@@ -20,17 +26,19 @@ void start() {
 
 	char* device;
 	char* stopTime;
-
+    
 	// 1. open connection
     printf("\n==================================\n");
-	printf("VALTIO: start socket connection\n");
+    printTime();
+	printf("start socket connection\n");
 	result = openConnection();
 	if (result!=0) 
 		return;
 
 	// 2. set settings
     printf("\n==================================\n");
-	printf("VALTIO: get settings from client\n");
+    printTime();
+    printf("get settings from client\n");
 	result = getSettingFromClient(&device, &stopTime);
 	if (result!=0)
 		return;
@@ -43,10 +51,15 @@ void start() {
 	signal(SIGALRM, stop);
 
     printf("\n==================================\n");
-	printf("VALTIO: start blktrace\n");
+	printf("start blktrace\n");
 	result = startBlktrace(device, stopTime);
 	if (result != 0) {
-		printf("error occurs during starting blktrace!\n");
+        signal(SIGINT, SIG_IGN);
+        signal(SIGHUP, SIG_IGN);
+        signal(SIGTERM, SIG_IGN);
+        signal(SIGALRM, SIG_IGN);
+
+        printf("error occurs during starting blktrace!\n");
 		return;
 	}
 }
@@ -61,6 +74,7 @@ void stop(__attribute__((__unused__)) int sig) {
 	closeConnection();
 	
     printf("\n\n==================================\n");
-	printf("VALTIO: valtio server finished\n");
+	printTime();
+    printf("valtio server finished\n\n");
 	exit(0);
 }

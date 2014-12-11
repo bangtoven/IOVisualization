@@ -22,7 +22,6 @@ int sendTraceToClient(struct blk_io_trace * t){
 	int n = write (connfd, t, SE_STRUCT_SIZE);
 	if(n<0) {
         socketError = 1;
-		printf("Error writing to socket: %d\n",n);
 		return -1;
 	}
 	
@@ -43,24 +42,32 @@ int getSettingFromClient(char** device, char** stopTime) {
 			perror("ERROR reading from socket");
 			return -1;
 		}
-		printf("server received %d bytes", n);
-
 		endIndex += n;
 		if (buf[endIndex-1]=='\n')
 			break;
 	}
 		
 	printf("client sended: %s",buf);
-	
-	char *tokened;
-	
-	tokened = strtok( buf, ",");
-	*device = malloc(strlen(tokened));
-	memcpy(*device, tokened, strlen(tokened));
-	
-	tokened = strtok( NULL, "\n");
-	*stopTime = malloc(strlen(tokened));
-	memcpy(*stopTime, tokened, strlen(tokened));
+    
+    for (n = 0; n<BUFSIZE; n++) {
+        if (buf[n]==',') {
+            *device = malloc(n+1);
+            memcpy(*device, buf, n);
+            (*device)[n] = 0;
+            break;
+        }
+    }
+    
+    int comma = n;
+    for ( ; n<BUFSIZE; n++) {
+        if (buf[n]=='\n') {
+            int length = n-comma-1;
+            *stopTime = malloc(length+1);
+            memcpy(*stopTime, buf+(comma+1), length);
+            (*stopTime)[length] = 0;
+            break;
+        }
+    }
 
 	return 0;
 }

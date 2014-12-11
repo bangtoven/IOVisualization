@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 	if (connect(sockfd, (const struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0) 
 		error("ERROR connecting asdfasfdafds");
 
-	write(sockfd,"/dev/sda,10\n",12);
+	write(sockfd,"/dev/sda,a9\n",12);
 
 	/* read: print the server's reply */
 	char buffer[BUFSIZE];

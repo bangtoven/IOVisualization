@@ -1389,6 +1389,9 @@ static int handle_list_file(struct tracer_devpath_head *hd, struct list_head *li
 		off = 0;
 		nevents = 0;
 		while (off + (int)sizeof(*t) <= tbp->len) {
+            if (socketError != 0)
+                break;
+
 			t = (struct blk_io_trace *)(tbp->buf + off);
 			t_len = sizeof(*t) + t->pdu_len;
 
@@ -1398,8 +1401,8 @@ static int handle_list_file(struct tracer_devpath_head *hd, struct list_head *li
 			// added by Jungho Bang. 2014. 11. 7. VALTIO team. 
 			int ret = sendTraceToClient(t);
 			if (ret < 0) {
-				printf("VALTIO socket error.\n");
-				alarm(1);
+				printf("!Error writing to socket\n");
+                alarm(1);
                 break;
 			}
 			
@@ -1442,11 +1445,17 @@ static void __process_trace_bufs(void)
 	int handled = 0;
 
 	__list_for_each(p, &devpaths) {
-		struct devpath *dpp = list_entry(p, struct devpath, head);
+        if (socketError != 0)
+            break;
+        
+        struct devpath *dpp = list_entry(p, struct devpath, head);
 		struct tracer_devpath_head *hd = dpp->heads;
 
 		for (cpu = 0; cpu < ncpus; cpu++, hd++) {
-			pthread_mutex_lock(&hd->mutex);
+            if (socketError != 0)
+                break;
+        
+            pthread_mutex_lock(&hd->mutex);
 			if (list_empty(&hd->head)) {
 				pthread_mutex_unlock(&hd->mutex);
 				continue;
