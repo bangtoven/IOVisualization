@@ -3,7 +3,7 @@ CFLAGS=-c -Wall
 
 all: echoclient
 
-echoclient: echoclient.o
+echoclient: echoclient.o serialization.o
 	$(CC) echoclient.o serialization.o -o echoclient
 
 echoclient.o: echoclient.c
