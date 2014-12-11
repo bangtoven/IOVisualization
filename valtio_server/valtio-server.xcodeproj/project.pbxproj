@@ -45,6 +45,8 @@
 		732F63721A395C7000AB3A16 /* socket_comm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = socket_comm.c; sourceTree = SOURCE_ROOT; };
 		732F63731A395C7000AB3A16 /* socket_comm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = socket_comm.h; sourceTree = SOURCE_ROOT; };
 		732F63741A395C7000AB3A16 /* valtio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = valtio.c; sourceTree = SOURCE_ROOT; };
+		732F637E1A3963E800AB3A16 /* linux-client-proto */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "linux-client-proto"; path = "../linux-client-proto"; sourceTree = "<group>"; };
+		732F637F1A39657400AB3A16 /* issue.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = issue.txt; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +63,7 @@
 		732F63541A395C1000AB3A16 = {
 			isa = PBXGroup;
 			children = (
+				732F637E1A3963E800AB3A16 /* linux-client-proto */,
 				732F635F1A395C1000AB3A16 /* valtio-server */,
 				732F635E1A395C1000AB3A16 /* Products */,
 			);
@@ -91,6 +94,7 @@
 				732F63721A395C7000AB3A16 /* socket_comm.c */,
 				732F63731A395C7000AB3A16 /* socket_comm.h */,
 				732F63741A395C7000AB3A16 /* valtio.c */,
+				732F637F1A39657400AB3A16 /* issue.txt */,
 			);
 			path = "valtio-server";
 			sourceTree = "<group>";

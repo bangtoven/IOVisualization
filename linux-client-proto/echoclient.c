@@ -31,8 +31,8 @@ int main(int argc, char **argv) {
 	// 	fprintf(stderr,"usage: %s <hostname> <port>\n", argv[0]);
 	// 	exit(0);
 	// }
-	hostname = "10.211.55.15";
-	portno = "8462";
+	hostname = "0.0.0.0";
+	portno = 8462;
 
 	/* socket: create the socket */
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -55,9 +55,9 @@ int main(int argc, char **argv) {
 
 	/* connect: create a connection with the server */
 	if (connect(sockfd, (const struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0) 
-		error("ERROR connecting");
+		error("ERROR connecting asdfasfdafds");
 
-	write(sockfd,"/dev/sda,500",12);
+	write(sockfd,"/dev/sda,500\n",13);
 
 	/* read: print the server's reply */
 	char buffer[BUFSIZE];
