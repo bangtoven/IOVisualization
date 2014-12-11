@@ -1402,7 +1402,6 @@ static int handle_list_file(struct tracer_devpath_head *hd, struct list_head *li
 			int ret = sendTraceToClient(t);
 			if (ret < 0) {
 				printf("!Error writing to socket\n");
-                alarm(1);
                 break;
 			}
 			
@@ -1439,7 +1438,10 @@ static int handle_list_file(struct tracer_devpath_head *hd, struct list_head *li
 
 static void __process_trace_bufs(void)
 {
-	int cpu;
+    if (socketError != 0)
+        return;
+
+    int cpu;
 	struct list_head *p;
 	struct list_head list;
 	int handled = 0;

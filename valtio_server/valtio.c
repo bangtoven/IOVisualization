@@ -74,5 +74,6 @@ void stop(__attribute__((__unused__)) int sig) {
     printf("\n\n==================================\n");
 	printTime();
     printf("Valtio server finished\n\n");
+    
 	exit(0);
 }

@@ -22,6 +22,7 @@ int sendTraceToClient(struct blk_io_trace * t){
 	int n = write (connfd, t, SE_STRUCT_SIZE);
 	if(n<0) {
         socketError = 1;
+        alarm(1);
 		return -1;
 	}
 	
