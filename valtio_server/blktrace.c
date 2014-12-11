@@ -2742,7 +2742,7 @@ out:
 // added by Jungho Bang. VALTIO team. 
 int startBlktrace(char* device, char* stopTime)
 {
-	int argc = 11;
+	int argc = 7;
 	char **args = malloc(sizeof(char*)*argc);
 	int i = 0;
 	args[i++] = "blktrace";
@@ -2752,14 +2752,6 @@ int startBlktrace(char* device, char* stopTime)
 	args[i++] = stopTime;
 	args[i++] = "-o";
 	args[i++] = "-";
-	// args[i++] = "-a";
-	// args[i++] = "read";
-	// args[i++] = "-a";
-	// args[i++] = "write";
-	args[i++] = "-a";
-	args[i++] = "issue";
-	args[i++] = "-a";
-	args[i++] = "complete";
 		
 	return blk_main(argc, args);
 }
