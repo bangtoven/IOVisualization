@@ -10,7 +10,7 @@ using System.Windows;
 
 namespace ValtioClient
 {
-    struct BlkIOTrace
+    public struct BlkIOTrace
     {
         public UInt32 magic; //4+4+8+8+4+4+4+4+4+2+2 = 48bytes
         public UInt32 sequence;
@@ -81,6 +81,32 @@ namespace ValtioClient
         public int startTimeInt = 0;
         public TracingIcon tracingIcon;
 
+        public void deleteExtra(BlkIOTrace t, UInt64 key, bool rwTemp)
+        {
+
+            Request tempRequest = new Request(t.sector, t.sector + t.bytes - 1, rwTemp, 0);
+            int time_unit = (int)((t.time - startTime) / 1000000000) + startTimeInt;
+
+            GlobalPref.totalInfo.addRequest(tempRequest, time_unit);
+
+            ProcessInfo curInfo;
+            if (GlobalPref.processInfos.TryGetValue(t.pid, out curInfo))
+            {
+                curInfo.addRequest(tempRequest, time_unit);
+            }
+            else
+            {
+                ProcessInfo tempInfo = new ProcessInfo(t.pid);
+                tempInfo.addRequest(tempRequest, time_unit);
+                GlobalPref.processInfos.Add(t.pid, tempInfo);
+                GlobalPref.pids.Add(t.pid);
+            }
+
+
+
+            readQueue.Remove(key);
+        }
+
         public void getData(object sender, SocketAsyncEventArgs e)
         {
             Socket ClientSocket = (Socket)sender;
@@ -117,6 +143,7 @@ namespace ValtioClient
 
                     i++;
 
+                    // Set startTime
                     if (startTime == 0)
                     {
                         startTimeInt = GlobalPref.timeElapsedInt;
@@ -157,6 +184,7 @@ namespace ValtioClient
                     rwbs[k] = '\0';
 
                     string rwbsString = new String(rwbs);
+                    bool rwTemp = true;
 
                     converted_action = t.action & 0xFFFF;
 
@@ -210,17 +238,16 @@ namespace ValtioClient
 
                                 Console.WriteLine("time is : " + elapsed);
 
-                                bool rwTemp;
                                 if (rwbsString.Contains('R'))
                                     rwTemp = false;
                                 else
                                     rwTemp = true;
-                                
+
                                 /* Find out min, max block & max latency */
                                 if (GlobalPref.minBlock == 0 && GlobalPref.maxBlock == 0)
                                 {
                                     GlobalPref.minBlock = t.sector;
-                                    GlobalPref.maxBlock = t.sector + t.bytes;
+                                    GlobalPref.maxBlock = t.sector + t.bytes - 1;
                                 }
                                 else
                                 {
@@ -228,9 +255,9 @@ namespace ValtioClient
                                     {
                                         GlobalPref.minBlock = t.sector;
                                     }
-                                    if (t.sector + t.bytes > GlobalPref.maxBlock)
+                                    if (t.sector + t.bytes - 1 > GlobalPref.maxBlock)
                                     {
-                                        GlobalPref.maxBlock = t.sector + t.bytes;
+                                        GlobalPref.maxBlock = t.sector + t.bytes - 1;
                                     }
                                 }
 
@@ -240,7 +267,7 @@ namespace ValtioClient
                                 }
 
                                 /*****************ADD REQUEST***************/
-                                Request tempRequest = new Request(t.sector, t.sector + t.bytes, rwTemp, elapsed);
+                                Request tempRequest = new Request(t.sector, t.sector + t.bytes - 1, rwTemp, elapsed);
                                 int time_unit = (int)((t.time - startTime) / 1000000000) + startTimeInt;
 
                                 GlobalPref.totalInfo.addRequest(tempRequest, time_unit);
@@ -275,7 +302,7 @@ namespace ValtioClient
 
                     if (test > 1000)
                     {
-                        readQueue.ToList().Where(pair => pair.Value < (t.time - 10000000000)).ToList().ForEach(pair => readQueue.Remove(pair.Key));
+                        readQueue.ToList().Where(pair => pair.Value < (t.time - 10000000000)).ToList().ForEach(pair => deleteExtra(t, pair.Key, rwTemp));
                         test = 0;
                     }
 

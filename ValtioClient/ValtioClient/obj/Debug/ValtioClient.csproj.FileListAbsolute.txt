@@ -43,15 +43,11 @@ C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debu
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\OxyPlot.Wpf.xml
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\OxyPlot.Xps.pdb
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\bin\Debug\OxyPlot.Xps.xml
-C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\SelectMenu.baml
-C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\Graph1.g.cs
-C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\SelectMenu.g.cs
-C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\GeneratedInternalTypeHelper.g.cs
-C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\ValtioClient_MarkupCompile.lref
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\EnvSetup.baml
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\StartUp.baml
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\TracingIcon.baml
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\EnvSetup.g.cs
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\StartUp.g.cs
 C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\TracingIcon.g.cs
-C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\Graph1.baml
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\Graph.g.cs
+C:\Users\dev\Documents\GitHub\IOVisualization\ValtioClient\ValtioClient\obj\Debug\Graph.baml

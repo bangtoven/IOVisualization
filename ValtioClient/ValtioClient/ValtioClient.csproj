@@ -117,25 +117,18 @@
     </ApplicationDefinition>
     <Compile Include="GlobalFunc.cs" />
     <Compile Include="GlobalPref.cs" />
-    <Compile Include="Graph1.xaml.cs">
-      <DependentUpon>Graph1.xaml</DependentUpon>
+    <Compile Include="Graph.xaml.cs">
+      <DependentUpon>Graph.xaml</DependentUpon>
     </Compile>
     <Compile Include="ReceiveData.cs" />
-    <Compile Include="SelectMenu.xaml.cs">
-      <DependentUpon>SelectMenu.xaml</DependentUpon>
-    </Compile>
     <Compile Include="TracingIcon.xaml.cs">
       <DependentUpon>TracingIcon.xaml</DependentUpon>
     </Compile>
-    <Page Include="Graph1.xaml">
+    <Page Include="Graph.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EnvSetup.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SelectMenu.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

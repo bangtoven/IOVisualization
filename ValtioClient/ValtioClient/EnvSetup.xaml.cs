@@ -34,8 +34,8 @@ namespace ValtioClient
             if (GlobalPref.debug)
             {
                 GlobalPref.setDeviceID("/dev/sda");
-                GlobalPref.setTraceLength(30);
-                GlobalPref.setTimeWindow(1);
+                GlobalPref.setTraceLength(60);
+                GlobalPref.setTimeWindow(2);
                 GlobalPref.setBlockUnit(1000);
 
                 ShowTray();

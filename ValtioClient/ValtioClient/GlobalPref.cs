@@ -10,8 +10,8 @@ namespace ValtioClient
     public class Request
     {
         public UInt64 st_addr; // Starting address
-        public UInt64 ed_addr; // Ending address
-        public bool rw; // 0: Read, 1: Write
+        public UInt64 ed_addr; // Ending address (Starting address + data length - 1)
+        public bool rw; // false: read, true: write
         public UInt64 lat; // Latency
 
         public Request(UInt64 st_addr, UInt64 ed_addr, bool rw, UInt64 lat)

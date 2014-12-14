@@ -68,9 +68,6 @@ namespace ValtioClient
 
             InitializeComponent();
 
-            // DEBUG
-            GlobalPref.setTraceLength(30);
-
             // Set up tray icon
             tb = ValtioNotifyIcon;
 
@@ -129,8 +126,8 @@ namespace ValtioClient
         // Stop tracing
         public void StopTrace()
         {
-            Window SelectMenu = new SelectMenu();
-            SelectMenu.Show();
+            Window graph = new Graph();
+            graph.Show();
             tb.Dispose();
             this.Close();
         }
