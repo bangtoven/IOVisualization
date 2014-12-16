@@ -10,22 +10,7 @@ using System.Windows;
 
 namespace ValtioClient
 {
-    public struct BlkIOTrace
-    {
-        public UInt32 magic; //4+4+8+8+4+4+4+4+4+2+2 = 48bytes
-        public UInt32 sequence;
-        public UInt64 time;
-        public UInt64 sector;
-        public UInt32 bytes;
-        public UInt32 action;
-        public UInt32 pid;
-        public UInt32 device;
-        public UInt32 cpu;
-        public UInt16 error;
-        public UInt16 pdu_len;
-    };
-
-    enum blkTA
+    public enum blkTA
     {
         __BLK_TA_QUEUE = 1,		/* queued */
         __BLK_TA_BACKMERGE,		/* back merged to existing rq */
@@ -46,7 +31,7 @@ namespace ValtioClient
         __BLK_TA_DRV_DATA,		/* binary driver data */
     };
 
-    enum blkTC
+    public enum blkTC
     {
         BLK_TC_READ = 1 << 0,	/* reads */
         BLK_TC_WRITE = 1 << 1,	/* writes */
@@ -68,49 +53,72 @@ namespace ValtioClient
         BLK_TC_END = 1 << 15,	/* we've run out of bits! */
     };
 
+    public struct BlkIOTrace 
+    {
+        public UInt32 magic; //4+4+8+8+4+4+4+4+4+2+2 = 48bytes
+        public UInt32 sequence;
+        public UInt64 time;
+        public UInt64 sector;
+        public UInt32 bytes;
+        public UInt32 action;
+        public UInt32 pid;
+        public UInt32 device;
+        public UInt32 cpu;
+        public UInt16 error;
+        public UInt16 pdu_len;
+    };
+
     public class ReceiveData
     {
-
+        public static UInt64 SECOND = 1000000000;
+        public static UInt64 MILLISECOND = 1000000;
         public int BLK_STRUCT_SIZE = System.Runtime.InteropServices.Marshal.SizeOf(typeof(BlkIOTrace));
-        public Dictionary<UInt64, UInt64> readQueue = new Dictionary<UInt64, UInt64>();
-        public Dictionary<UInt64, UInt64> writeQueue = new Dictionary<UInt64, UInt64>();
-        public Dictionary<UInt64, UInt32> checkQueue = new Dictionary<UInt64, UInt32>();
+        public Dictionary<UInt64, BlkIOTrace> requestQueue = new Dictionary<UInt64, BlkIOTrace>();
         public int endIndex = 0;
-        public int test = 0;
+        public UInt64 clearTime = 0;
+        public UInt64 CLEAR_CYCLE = 5 * SECOND;
         public UInt64 startTime = 0;
         public int startTimeInt = 0;
+        public UInt64 lastLatency = 0;
         public TracingIcon tracingIcon;
 
-        public void deleteExtra(BlkIOTrace t, UInt64 key, bool rwTemp)
+        public void deleteExtra(KeyValuePair<UInt64, BlkIOTrace> pair)
         {
+            BlkIOTrace t = pair.Value;
 
-            Request tempRequest = new Request(t.sector, t.sector + t.bytes - 1, rwTemp, 0);
-            int time_unit = (int)((t.time - startTime) / 1000000000) + startTimeInt;
+            bool isWrite = (t.time%2 == 0);
+            Request tempRequest = new Request(pair.Key, pair.Key + t.bytes - 1, isWrite, lastLatency);
 
-            GlobalPref.totalInfo.addRequest(tempRequest, time_unit);
+            int time_unit = (int)(Math.Abs((Int64)(t.time - startTime)) / (Int64)MILLISECOND) + startTimeInt * 1000;
 
-            ProcessInfo curInfo;
-            if (GlobalPref.processInfos.TryGetValue(t.pid, out curInfo))
+            if (t.pid < 65535)
             {
-                curInfo.addRequest(tempRequest, time_unit);
+                GlobalPref.totalInfo.addRequest(tempRequest, time_unit);
+
+                ProcessInfo curInfo;
+                if (GlobalPref.processInfos.TryGetValue(t.pid, out curInfo))
+                {
+                    GlobalPref.requestCount[t.pid]++;
+                    curInfo.addRequest(tempRequest, time_unit);
+                    GlobalPref.processInfos[t.pid] = curInfo;
+                }
+                else
+                {
+                    ProcessInfo tempInfo = new ProcessInfo(t.pid);
+                    tempInfo.addRequest(tempRequest, time_unit);
+                    GlobalPref.processInfos.Add(t.pid, tempInfo);
+                    GlobalPref.pids.Add(t.pid);
+                    GlobalPref.requestCount.Add(t.pid, 1);
+                }
             }
-            else
-            {
-                ProcessInfo tempInfo = new ProcessInfo(t.pid);
-                tempInfo.addRequest(tempRequest, time_unit);
-                GlobalPref.processInfos.Add(t.pid, tempInfo);
-                GlobalPref.pids.Add(t.pid);
-            }
 
-
-
-            readQueue.Remove(key);
+            requestQueue.Remove(pair.Key);
         }
 
         public void getData(object sender, SocketAsyncEventArgs e)
         {
             Socket ClientSocket = (Socket)sender;
-            GlobalPref.szData = e.Buffer;
+            GlobalPref.szData = e.Buffer; 
             byte[] temp = new byte[48];
 
             Buffer.BlockCopy(GlobalPref.szData, 0, GlobalPref.szDataSum, endIndex, e.BytesTransferred);
@@ -121,8 +129,7 @@ namespace ValtioClient
                 int buflength = e.BytesTransferred + endIndex;
                 int offset = 0;
                 int i = 0;
-
-
+                
                 UInt32 converted_action;
                 UInt64 elapsed = 0;
 
@@ -140,7 +147,7 @@ namespace ValtioClient
                     t.cpu = BitConverter.ToUInt32(GlobalPref.szData, 40 + i * 48);
                     t.error = BitConverter.ToUInt16(GlobalPref.szData, 44 + i * 48);
                     t.pdu_len = BitConverter.ToUInt16(GlobalPref.szData, 46 + i * 48);
-
+                    
                     i++;
 
                     // Set startTime
@@ -148,8 +155,17 @@ namespace ValtioClient
                     {
                         startTimeInt = GlobalPref.timeElapsedInt;
                         startTime = t.time;
+                        clearTime = t.time;
                     }
 
+                    // Debug
+                    /*
+                    if (t.time < startTime)
+                    {
+                        Console.WriteLine("Time error");
+                    }
+                     * */
+                    
                     UInt32 w = t.action & (((UInt32)blkTC.BLK_TC_WRITE) << 16);
                     UInt32 a = t.action & (((UInt32)blkTC.BLK_TC_AHEAD) << 16);
                     UInt32 s = t.action & (((UInt32)blkTC.BLK_TC_SYNC) << 16);
@@ -194,26 +210,27 @@ namespace ValtioClient
                     switch (converted_action)
                     {
                         case (UInt32)blkTA.__BLK_TA_QUEUE:
-                            if (readQueue.ContainsKey(t.sector)) //find_track()
+                            if (requestQueue.ContainsKey(t.sector)) //find_track()
                             {
-                                readQueue[t.sector] = t.time;
+                                requestQueue[t.sector] = t;
                             }
                             else
                             {
-                                readQueue.Add(t.sector, t.time);
+                                requestQueue.Add(t.sector, t);
                             }
                             break;
                         case (UInt32)blkTA.__BLK_TA_FRONTMERGE:
                             UInt64 target;
                             target = t.sector + (t.bytes >> 9);
-                            if (readQueue.ContainsKey(target))
+                            if (requestQueue.ContainsKey(target))
                             {
-                                UInt64 temptime = readQueue[target];
-                                readQueue.Remove(target);
+                                BlkIOTrace blkTrace = requestQueue[target];
+                                requestQueue.Remove(target);
                                 target -= (t.bytes >> 9);
+                                blkTrace.sector -= (t.bytes >> 9);
                                 try
                                 {
-                                    readQueue.Add(target, temptime);
+                                    requestQueue.Add(target, blkTrace);
                                 }
                                 catch (Exception)
                                 {
@@ -222,21 +239,22 @@ namespace ValtioClient
                             }
                             break;
                         case (UInt32)blkTA.__BLK_TA_ISSUE:
-                            if ((t.action & ((UInt32)blkTC.BLK_TC_FS << 16)) == 0)
+                            if (((UInt32)t.action & ((UInt32)blkTC.BLK_TC_FS << 16)) == 0)
                             {
                                 break;
                             }
-                            if (readQueue.ContainsKey(t.sector))
+                            if (requestQueue.ContainsKey(t.sector))
                             {
-                                readQueue[t.sector] = t.time;
+                                requestQueue[t.sector] = t;
                             }
                             break;
                         case (UInt32)blkTA.__BLK_TA_COMPLETE:
-                            if (readQueue.ContainsKey(t.sector))
+                            if (requestQueue.ContainsKey(t.sector))
                             {
-                                elapsed = t.time - readQueue[t.sector];
+                                elapsed = t.time - requestQueue[t.sector].time;
+                                lastLatency = elapsed;
 
-                                Console.WriteLine("time is : " + elapsed);
+                                //Console.WriteLine("time is : " + elapsed);
 
                                 if (rwbsString.Contains('R'))
                                     rwTemp = false;
@@ -268,46 +286,59 @@ namespace ValtioClient
 
                                 /*****************ADD REQUEST***************/
                                 Request tempRequest = new Request(t.sector, t.sector + t.bytes - 1, rwTemp, elapsed);
-                                int time_unit = (int)((t.time - startTime) / 1000000000) + startTimeInt;
+                                int time_unit = (int)(Math.Abs((Int64)(t.time - startTime)) / (Int64)MILLISECOND) + startTimeInt;
 
                                 GlobalPref.totalInfo.addRequest(tempRequest, time_unit);
 
-                                ProcessInfo curInfo;
-                                if (GlobalPref.processInfos.TryGetValue(t.pid, out curInfo))
+                                // Change pid if 0
+                                if (t.pid == 0)
                                 {
-                                    curInfo.addRequest(tempRequest, time_unit);
+                                    t.pid = requestQueue[t.sector].pid;
                                 }
-                                else
+
+                                if (t.pid < 65535)
                                 {
-                                    ProcessInfo tempInfo = new ProcessInfo(t.pid);
-                                    tempInfo.addRequest(tempRequest, time_unit);
-                                    GlobalPref.processInfos.Add(t.pid, tempInfo);
-                                    GlobalPref.pids.Add(t.pid);
+                                    ProcessInfo curInfo;
+                                    if (GlobalPref.processInfos.TryGetValue(t.pid, out curInfo))
+                                    {
+                                        GlobalPref.requestCount[t.pid]++;
+                                        curInfo.addRequest(tempRequest, time_unit);
+                                        GlobalPref.processInfos[t.pid] = curInfo;
+                                    }
+                                    else
+                                    {
+                                        ProcessInfo tempInfo = new ProcessInfo(t.pid);
+                                        tempInfo.addRequest(tempRequest, time_unit);
+                                        GlobalPref.processInfos.Add(t.pid, tempInfo);
+                                        GlobalPref.pids.Add(t.pid);
+                                        GlobalPref.requestCount.Add(t.pid, 1);
+                                    }
                                 }
                                 /*****************ADD REQUEST***************/
 
-                                Console.WriteLine(time_unit);
+                                //Console.WriteLine(time_unit);
 
-                                if (elapsed > 1000000000)
+                                if (elapsed > SECOND)
                                 {
-                                    textValue = "time is : " + elapsed + " t.time is : " + t.time + " readQueue[t.sector] is : " + readQueue[t.sector];
+                                    textValue = "time is : " + elapsed + " t.time is : " + t.time + " readQueue[t.sector].time is : " + requestQueue[t.sector].time;
                                     System.IO.File.AppendAllText(savePath, textValue + Environment.NewLine, Encoding.Default);
                                 }
-                                readQueue.Remove(t.sector);
+                                requestQueue.Remove(t.sector);
                             }
                             break;
                         default:
                             break;
                     }
 
-                    if (test > 1000)
+                    // Complete 안된놈들 지우기
+                    if (t.time - clearTime > CLEAR_CYCLE)
                     {
-                        readQueue.ToList().Where(pair => pair.Value < (t.time - 10000000000)).ToList().ForEach(pair => deleteExtra(t, pair.Key, rwTemp));
-                        test = 0;
+                        clearTime = t.time;
+                        requestQueue.ToList().Where(pair => t.time - pair.Value.time > CLEAR_CYCLE).ToList().ForEach(pair => deleteExtra(pair));
                     }
 
-                    test++;
                     offset = offset + BLK_STRUCT_SIZE;
+
 
                 }
 
@@ -324,14 +355,13 @@ namespace ValtioClient
                 args.Completed
                     += new EventHandler<SocketAsyncEventArgs>(getData);
                 GlobalPref.m_ClientSocket.ReceiveAsync(args);
-
             }
             else
             {
                 Application.Current.Dispatcher.Invoke((Action)delegate() { tracingIcon.StopTrace(); }, null);
 
                 Console.WriteLine("Connection ended!");
-                Console.WriteLine(readQueue.Count);
+                Console.WriteLine(requestQueue.Count);
                 ClientSocket.Disconnect(false);
                 ClientSocket.Dispose();
             }

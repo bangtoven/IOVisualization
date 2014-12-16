@@ -26,8 +26,10 @@ namespace ValtioClient
     {
         private static UInt64 blk_len = GlobalPref.maxBlock - GlobalPref.minBlock + 1;
         private static UInt64 bu = (UInt64)GlobalPref.getBlockUnit();
-        private static int time_len = GlobalPref.getTraceLength();
+        private static int time_len = GlobalPref.getTraceLength() * 1000;
         private static int tu = GlobalPref.getTimeWindow();
+        private static OxyColor ReadColor = OxyColors.Blue;
+        private static OxyColor WriteColor = OxyColors.Red;
 
         private static UInt64 blk_cnt;
         private static int time_cnt;
@@ -47,8 +49,21 @@ namespace ValtioClient
             }
         }
 
-        private PlotModel plotModel;
+        private Boolean loadedBool = true; // Used for OxyLoading
+        public Boolean LoadedBool
+        {
+            get
+            {
+                return this.loadedBool;
+            }
+            set
+            {
+                this.loadedBool = value;
+                this.RaisePropertyChanged("LoadedBool");
+            }
+        }
 
+        private PlotModel plotModel; // Used for OxyPlot graph
         public PlotModel PlotModel
         {
             get
@@ -88,88 +103,96 @@ namespace ValtioClient
             // UI
             InitializeComponent();
             this.DataContext = this;
+            CheckRadio();
+
+            // Process Infos
+            GlobalPref.requestCountList = GlobalPref.requestCount.ToList();
+            GlobalPref.requestCountList.Sort(delegate(KeyValuePair<uint, int> pair1, KeyValuePair<uint, int> pair2)
+            {
+                return pair2.Value.CompareTo(pair1.Value);
+            });
+
+            for (int i = 0; i < GlobalPref.requestCountList.Count; i++)
+            {
+                uint pid = GlobalPref.requestCountList[i].Key;
+                int count = GlobalPref.requestCountList[i].Value;
+                processList.Items.Add(pid + " (" + count + ")");
+                Console.WriteLine("pid: " + pid + " count: " + count); // Debug
+            }
         }
 
         /* Button click methods */
         private void AddrFreq_Click(object sender, RoutedEventArgs e)
         {
-            Preprocessing();
-            oxyLoading.IsContentLoaded = false;
-            whichGraph = 1;
-            CheckRadio();
-            this.PlotModel = this.AddrFreq();
-            oxyLoading.IsContentLoaded = true;
+            Preprocessing(1);
+            this.PlotModel = this.AddrFreq(-1);
+            Postprocessing(1);
         }
 
         private void TimeAddr_Click(object sender, RoutedEventArgs e)
         {
-            Preprocessing();
-            oxyLoading.IsContentLoaded = false;
-            whichGraph = 2;
-            CheckRadio();
-            this.PlotModel = this.TimeAddr();
-            oxyLoading.IsContentLoaded = true;
+            Preprocessing(2);
+            this.PlotModel = this.TimeAddr(-1);
+            Postprocessing(2);
         }
 
         private void TimeFreq_Click(object sender, RoutedEventArgs e)
         {
-            Preprocessing();
-            oxyLoading.IsContentLoaded = false;
-            whichGraph = 3;
-            CheckRadio();
-            this.PlotModel = this.TimeFreq();
-            oxyLoading.IsContentLoaded = true;
+            Preprocessing(3);
+            this.PlotModel = this.TimeFreq(-1);
+            Postprocessing(3);
         }
 
         private void LatFreq_Click(object sender, RoutedEventArgs e)
         {
-            Preprocessing();
-            oxyLoading.IsContentLoaded = false;
-            whichGraph = 4;
-            CheckRadio();
-            this.PlotModel = this.LatFreq();
-            oxyLoading.IsContentLoaded = true;
+            Preprocessing(4);
+            this.PlotModel = this.LatFreq(-1);
+            Postprocessing(4);
         }
 
         private void TimeLatAvg_Click(object sender, RoutedEventArgs e)
         {
-            Preprocessing();
-            oxyLoading.IsContentLoaded = false;
-            whichGraph = 5;
-            CheckRadio();
-            this.PlotModel = this.TimeLatAvg();
-            oxyLoading.IsContentLoaded = true;
+            Preprocessing(5);
+            this.PlotModel = this.TimeLatAvg(-1);
+            Postprocessing(5);
         }
 
         private void Throughput_Click(object sender, RoutedEventArgs e)
         {
-            Preprocessing();
-            oxyLoading.IsContentLoaded = false;
-            whichGraph = 6;
-            CheckRadio();
-            this.PlotModel = this.Throughput();
-            oxyLoading.IsContentLoaded = true;
+            Preprocessing(6);
+            this.PlotModel = this.Throughput(-1);
+            Postprocessing(6);
         }
 
         /* Preprocessing - use this to make something happen before each graph is called */
-        private void Preprocessing()
+        private void Preprocessing(int type)
         {
+            LoadedBool = false;
+            whichGraph = type;
             allRB.IsChecked = true;
+            CheckRadio();
+        }
+
+        /* Postprocessing - use this to make something happen after each graph is called */
+        private void Postprocessing(int type)
+        {
+            LoadedBool = true;
         }
 
         /* Checks radio buttons */
         private void CheckRadio()
         {
-            if (whichGraph == 4)
+            // Disable radio buttons either on startup or in LatFreq graph
+            if (whichGraph == 0 || whichGraph == 4)
             {
-                // Disable radio buttons
                 readRB.IsEnabled = false;
                 writeRB.IsEnabled = false;
                 allRB.IsEnabled = false;
             }
+            // Enable radio buttons otherwise
             else
             {
-                // Enable radio buttons
+
                 readRB.IsEnabled = true;
                 writeRB.IsEnabled = true;
                 allRB.IsEnabled = true;
@@ -177,7 +200,7 @@ namespace ValtioClient
         }
 
         /* Address vs Frequency */
-        private PlotModel AddrFreq()
+        private PlotModel AddrFreq(int pid)
         {
             var plotModel1 = new PlotModel();
 
@@ -203,9 +226,20 @@ namespace ValtioClient
                 w_count[i] = 0;
             }
 
-            for (int i = 0; i < GlobalPref.totalInfo.time_units.Count; i++)
+            ProcessInfo pinfo;
+
+            if (pid == -1) // All processes
             {
-                TimeUnit temp = GlobalPref.totalInfo.time_units[i];
+                pinfo = GlobalPref.totalInfo;
+            }
+            else // Specific process
+            {
+                pinfo = GlobalPref.processInfos[(UInt32)pid];
+            }
+
+            for (int i = 0; i < pinfo.time_units.Count; i++)
+            {
+                TimeUnit temp = pinfo.time_units[i];
                 for (int j = 0; j < temp.time_unit.Count; j++)
                 {
                     Request t = temp.time_unit[j];
@@ -238,8 +272,8 @@ namespace ValtioClient
             var lineSeries1 = new LineSeries();
             var lineSeries2 = new LineSeries();
             var lineSeries3 = new LineSeries();
-            lineSeries1.Color = OxyColors.Blue;
-            lineSeries2.Color = OxyColors.Red;
+            lineSeries1.Color = ReadColor;
+            lineSeries2.Color = WriteColor;
 
             for (UInt64 i = 0; i < blk_cnt; i++)
             {
@@ -260,7 +294,7 @@ namespace ValtioClient
         }
 
         /* Time vs Address */
-        private PlotModel TimeAddr()
+        private PlotModel TimeAddr(int pid)
         {
             var plotModel1 = new PlotModel();
 
@@ -275,7 +309,7 @@ namespace ValtioClient
 
             var linearAxis1 = new LinearAxis();
             linearAxis1.Title = "Time";
-            linearAxis1.Unit = "s";
+            linearAxis1.Unit = "ms";
             linearAxis1.Position = AxisPosition.Bottom;
             plotModel1.Axes.Add(linearAxis1);
 
@@ -295,16 +329,27 @@ namespace ValtioClient
             scatterSeries3.MarkerSize = 1;
             scatterSeries3.TrackerFormatString = "{0}\n{1}: {2:0.###}\n{3}: {4:0.###}\n{5}: {6:0.###}";
 
+            ProcessInfo pinfo;
+
+            if (pid == -1) // All processes
+            {
+                pinfo = GlobalPref.totalInfo;
+            }
+            else // Specific process
+            {
+                pinfo = GlobalPref.processInfos[(UInt32)pid];
+            }
+
             // Count frequency at block address per time unit & store points in graph
             UInt64[] r_count = new UInt64[time_cnt];
             UInt64[] w_count = new UInt64[time_cnt];
             Array.Clear(r_count, 0, r_count.Length);
             Array.Clear(w_count, 0, w_count.Length);
 
-            int tuCount = GlobalPref.totalInfo.time_units.Count;
+            int tuCount = pinfo.time_units.Count;
             for (int i = 0; i < tuCount; i++)
             {
-                TimeUnit temp = GlobalPref.totalInfo.time_units[i];
+                TimeUnit temp = pinfo.time_units[i];
                 int reqCount = temp.time_unit.Count;
                 UInt64[] r_addr_count = new UInt64[blk_cnt];
                 UInt64[] w_addr_count = new UInt64[blk_cnt];
@@ -374,7 +419,7 @@ namespace ValtioClient
         }
 
         /* Time vs Frequency */
-        private PlotModel TimeFreq()
+        private PlotModel TimeFreq(int pid)
         {
             var plotModel1 = new PlotModel();
 
@@ -388,10 +433,20 @@ namespace ValtioClient
 
             var linearAxis2 = new LinearAxis();
             linearAxis2.Title = "Time";
-            linearAxis2.Unit = "s";
+            linearAxis2.Unit = "ms";
             linearAxis2.Position = AxisPosition.Bottom;
             plotModel1.Axes.Add(linearAxis2);
-            
+
+            ProcessInfo pinfo;
+
+            if (pid == -1) // All processes
+            {
+                pinfo = GlobalPref.totalInfo;
+            }
+            else // Specific process
+            {
+                pinfo = GlobalPref.processInfos[(UInt32)pid];
+            }
 
             // Calculate frequency according to time window
             UInt64[] r_count = new UInt64[time_cnt];
@@ -399,24 +454,31 @@ namespace ValtioClient
             Array.Clear(r_count, 0, r_count.Length);
             Array.Clear(w_count, 0, w_count.Length);
 
-            int tuCount = GlobalPref.totalInfo.time_units.Count;
+            int tuCount = pinfo.time_units.Count;
             for (int i = 0; i < tuCount; i++)
             {
-                TimeUnit temp = GlobalPref.totalInfo.time_units[i];
+                TimeUnit temp = pinfo.time_units[i];
                 int time_index = temp.tu / GlobalPref.getTimeWindow();
                 int reqCount = temp.time_unit.Count;
 
-                for (int j = 0; j < reqCount; j++)
+                try
                 {
-                    Request t = temp.time_unit[j];
-                    if (t.rw)
+                    for (int j = 0; j < reqCount; j++)
                     {
-                        w_count[time_index]++;
+                        Request t = temp.time_unit[j];
+                        if (t.rw)
+                        {
+                            w_count[time_index]++;
+                        }
+                        else
+                        {
+                            r_count[time_index]++;
+                        }
                     }
-                    else
-                    {
-                        r_count[time_index]++;
-                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
                 }
             }
 
@@ -424,16 +486,13 @@ namespace ValtioClient
             var lineSeries1 = new LineSeries();
             var lineSeries2 = new LineSeries();
             var lineSeries3 = new LineSeries();
-            lineSeries1.Color = OxyColors.Blue;
-            lineSeries2.Color = OxyColors.Red;
-            lineSeries1.Smooth = true;
-            lineSeries2.Smooth = true;
-            lineSeries3.Smooth = true;
-            lineSeries1.MarkerType = MarkerType.Circle;
-            lineSeries2.MarkerType = MarkerType.Circle;
-            lineSeries3.MarkerType = MarkerType.Circle;
-            lineSeries1.MarkerFill = OxyColors.Blue;
-            lineSeries2.MarkerFill = OxyColors.Red;
+            lineSeries1.Color = WriteColor;
+            lineSeries2.Color = ReadColor;
+            //lineSeries1.MarkerType = MarkerType.Circle;
+            //lineSeries2.MarkerType = MarkerType.Circle;
+            //lineSeries3.MarkerType = MarkerType.Circle;
+            //lineSeries1.MarkerFill = WriteColor;
+            //lineSeries2.MarkerFill = ReadColor;
 
             for (int i = 0; i < time_cnt; i++)
             {
@@ -453,23 +512,41 @@ namespace ValtioClient
         }
 
         /* Latency vs Frequency */
-        private PlotModel LatFreq()
+        private PlotModel LatFreq(int pid)
         {
             // Intialize count
             int[] r_count = new int[10];
             int[] w_count = new int[10];
+            Array.Clear(r_count, 0, r_count.Length);
+            Array.Clear(w_count, 0, w_count.Length);
+
+            ProcessInfo pinfo;
+
+            if (pid == -1) // All processes
+            {
+                pinfo = GlobalPref.totalInfo;
+            }
+            else // Specific process
+            {
+                pinfo = GlobalPref.processInfos[(UInt32)pid];
+            }
 
             // Count frequency
-            for (int i = 0; i < GlobalPref.totalInfo.time_units.Count; i++)
+            for (int i = 0; i < pinfo.time_units.Count; i++)
             {
-                TimeUnit temp = GlobalPref.totalInfo.time_units[i];
+                TimeUnit temp = pinfo.time_units[i];
                 for (int j = 0; j < temp.time_unit.Count; j++)
                 {
                     Request t = temp.time_unit[j];
                     UInt64 templat = t.lat;
                     if (t.rw)
                     {
-                        if (templat < 10)
+                        if (templat <= 0)
+                        {
+                            if (GlobalPref.debug)
+                                w_count[0]++;
+                        }
+                        else if (templat < 10)
                             w_count[0]++;
                         else if (templat < 100)
                             w_count[1]++;
@@ -492,7 +569,12 @@ namespace ValtioClient
                     }
                     else
                     {
-                        if (templat < 10)
+                        if (templat <= 0)
+                        {
+                            if (GlobalPref.debug)
+                                w_count[0]++;
+                        }
+                        else if (templat < 10)
                             r_count[0]++;
                         else if (templat < 100)
                             r_count[1]++;
@@ -556,7 +638,7 @@ namespace ValtioClient
             columnSeries2.StrokeThickness = 1;
             columnSeries2.Title = "Write";
             columnSeries2.LabelPlacement = LabelPlacement.Middle;
-            columnSeries2.FillColor = OxyColors.Lavender;
+            columnSeries2.FillColor = OxyColors.LightPink;
 
             for (int i = 0; i < 10; i++)
             {
@@ -571,7 +653,7 @@ namespace ValtioClient
         }
 
         /* Time vs Average Latency*/
-        private PlotModel TimeLatAvg()
+        private PlotModel TimeLatAvg(int pid)
         {
             var plotModel1 = new PlotModel();
 
@@ -586,9 +668,20 @@ namespace ValtioClient
             plotModel1.Axes.Add(linearAxis1);
             var linearAxis2 = new LinearAxis();
             linearAxis2.Title = "Time";
-            linearAxis2.Unit = "s";
+            linearAxis2.Unit = "ms";
             linearAxis2.Position = AxisPosition.Bottom;
             plotModel1.Axes.Add(linearAxis2);
+
+            ProcessInfo pinfo;
+
+            if (pid == -1) // All processes
+            {
+                pinfo = GlobalPref.totalInfo;
+            }
+            else // Specific process
+            {
+                pinfo = GlobalPref.processInfos[(UInt32)pid];
+            }
 
             // Calculate Average Latency according to time window
             UInt64[] r_count = new UInt64[time_cnt];
@@ -596,45 +689,55 @@ namespace ValtioClient
             Array.Clear(r_count, 0, r_count.Length);
             Array.Clear(w_count, 0, w_count.Length);
 
-            int tuCount = GlobalPref.totalInfo.time_units.Count;
+            int tuCount = pinfo.time_units.Count;
             for (int i = 0; i < tuCount; i++)
             {
-                TimeUnit temp = GlobalPref.totalInfo.time_units[i];
+                TimeUnit temp = pinfo.time_units[i];
                 int time_index = temp.tu / GlobalPref.getTimeWindow();
                 int reqCount = temp.time_unit.Count;
                 UInt64 r_latSum = 0;
                 UInt64 w_latSum = 0;
-                for (int j = 0; j < reqCount; j++)
+
+                try
                 {
-                    Request t = temp.time_unit[j];
-                    if (t.rw)
+                    for (int j = 0; j < reqCount; j++)
                     {
-                        w_latSum += t.lat;
+                        Request t = temp.time_unit[j];
+                        if (t.lat > 0)
+                        {
+                            if (t.rw)
+                            {
+                                w_latSum += t.lat;
+                            }
+                            else
+                            {
+                                r_latSum += t.lat;
+                            }
+                            //notZeroCount++;
+                        }
                     }
-                    else
-                    {
-                        r_latSum += t.lat;
-                    }
+
+                    //average 구해서 각 tu 에 넣는다. 이때, count[0] 에는 아무것도 안들어있을 수도 있음. count[4]부터 들어갔을 수도 있다.
+                    r_count[time_index] = r_latSum / (UInt64)reqCount;
+                    w_count[time_index] = w_latSum / (UInt64)reqCount;
                 }
-                //average 구해서 각 tu 에 넣는다. 이때, count[0] 에는 아무것도 안들어있을 수도 있음. count[4]부터 들어갔을 수도 있다.
-                r_count[time_index] = r_latSum / (UInt64)reqCount; 
-                w_count[time_index] = w_latSum / (UInt64)reqCount;
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
             }
 
             // Add points
             var lineSeries1 = new LineSeries();
             var lineSeries2 = new LineSeries();
             var lineSeries3 = new LineSeries();
-            lineSeries1.Color = OxyColors.Blue;
-            lineSeries2.Color = OxyColors.Red;
-            lineSeries1.Smooth = true;
-            lineSeries2.Smooth = true;
-            lineSeries3.Smooth = true;
-            lineSeries1.MarkerType = MarkerType.Circle;
-            lineSeries2.MarkerType = MarkerType.Circle;
-            lineSeries3.MarkerType = MarkerType.Circle;
-            lineSeries1.MarkerFill = OxyColors.Blue;
-            lineSeries2.MarkerFill = OxyColors.Red;
+            lineSeries1.Color = ReadColor;
+            lineSeries2.Color = WriteColor;
+            //lineSeries1.MarkerType = MarkerType.Circle;
+           //lineSeries2.MarkerType = MarkerType.Circle;
+           //lineSeries3.MarkerType = MarkerType.Circle;
+           //lineSeries1.MarkerFill = ReadColor;
+           //lineSeries2.MarkerFill = WriteColor;
 
             for (int i = 0; i < time_cnt; i++)
             {
@@ -654,7 +757,7 @@ namespace ValtioClient
         }
 
         /* Throughput */
-        private PlotModel Throughput()
+        private PlotModel Throughput(int pid)
         {
             var plotModel1 = new PlotModel();
 
@@ -667,9 +770,20 @@ namespace ValtioClient
             plotModel1.Axes.Add(linearAxis1);
             var linearAxis2 = new LinearAxis();
             linearAxis2.Title = "Time";
-            linearAxis2.Unit = "s";
+            linearAxis2.Unit = "ms";
             linearAxis2.Position = AxisPosition.Bottom;
             plotModel1.Axes.Add(linearAxis2);
+
+            ProcessInfo pinfo;
+
+            if (pid == -1) // All processes
+            {
+                pinfo = GlobalPref.totalInfo;
+            }
+            else // Specific process
+            {
+                pinfo = GlobalPref.processInfos[(UInt32)pid];
+            }
 
             // Calculate byte size according to time window
             UInt64[] r_count = new UInt64[time_cnt];
@@ -677,14 +791,20 @@ namespace ValtioClient
             Array.Clear(r_count, 0, r_count.Length);
             Array.Clear(w_count, 0, w_count.Length);
 
-            int tuCount = GlobalPref.totalInfo.time_units.Count;
+            int tuCount = pinfo.time_units.Count;
             for (int i = 0; i < tuCount; i++)
             {
-                TimeUnit temp = GlobalPref.totalInfo.time_units[i];
+                TimeUnit temp = pinfo.time_units[i];
                 int time_index = temp.tu / GlobalPref.getTimeWindow();
                 int reqCount = temp.time_unit.Count;
                 UInt64 r_dataSum = 0;
                 UInt64 w_dataSum = 0;
+
+                if (time_index >= time_cnt)
+                {
+                    break;
+                }
+
                 for (int j = 0; j < reqCount; j++)
                 {
                     Request t = temp.time_unit[j];
@@ -705,16 +825,13 @@ namespace ValtioClient
             var lineSeries1 = new LineSeries();
             var lineSeries2 = new LineSeries();
             var lineSeries3 = new LineSeries();
-            lineSeries1.Color = OxyColors.Blue;
-            lineSeries2.Color = OxyColors.Red;
-            lineSeries1.Smooth = true;
-            lineSeries2.Smooth = true;
-            lineSeries3.Smooth = true;
-            lineSeries1.MarkerType = MarkerType.Circle;
-            lineSeries2.MarkerType = MarkerType.Circle;
-            lineSeries3.MarkerType = MarkerType.Circle;
-            lineSeries1.MarkerFill = OxyColors.Blue;
-            lineSeries2.MarkerFill = OxyColors.Red;
+            lineSeries1.Color = ReadColor;
+            lineSeries2.Color = WriteColor;
+            //lineSeries1.MarkerType = MarkerType.Circle;
+            //lineSeries2.MarkerType = MarkerType.Circle;
+            //lineSeries3.MarkerType = MarkerType.Circle;
+            //lineSeries1.MarkerFill = ReadColor;
+            //lineSeries2.MarkerFill = WriteColor;
 
             for (int i = 0; i < time_cnt; i++)
             {
@@ -738,7 +855,7 @@ namespace ValtioClient
             this.PlotModel.Series[0].IsVisible = true;
             this.PlotModel.Series[1].IsVisible = false;
             this.PlotModel.Series[2].IsVisible = false;
-            PlotModel.InvalidatePlot(true);
+            this.PlotModel.InvalidatePlot(true);
         }
 
         private void SeriesWrite()
@@ -746,7 +863,7 @@ namespace ValtioClient
             this.PlotModel.Series[0].IsVisible = false;
             this.PlotModel.Series[1].IsVisible = true;
             this.PlotModel.Series[2].IsVisible = false;
-            PlotModel.InvalidatePlot(true);
+            this.PlotModel.InvalidatePlot(true);
         }
 
         private void SeriesAll()
@@ -754,28 +871,28 @@ namespace ValtioClient
             this.PlotModel.Series[0].IsVisible = false;
             this.PlotModel.Series[1].IsVisible = false;
             this.PlotModel.Series[2].IsVisible = true;
-            PlotModel.InvalidatePlot(true);
+            this.PlotModel.InvalidatePlot(true);
         }
 
         /* Functions used for RadioButton control */
         private void readRB_Checked(object sender, RoutedEventArgs e)
         {
-            oxyLoading.IsContentLoaded = false;
+            LoadedBool = false;
             if (whichGraph != 4)
             {
                 SeriesRead();
             }
-            oxyLoading.IsContentLoaded = true;
+            LoadedBool = true;
         }
 
         private void writeRB_Checked(object sender, RoutedEventArgs e)
         {
-            oxyLoading.IsContentLoaded = false;
+            LoadedBool = false;
             if (whichGraph != 4)
             {
                 SeriesWrite();
             }
-            oxyLoading.IsContentLoaded = true;
+            LoadedBool = true;
         }
 
         private void allRB_Checked(object sender, RoutedEventArgs e)
@@ -786,12 +903,88 @@ namespace ValtioClient
             }
             else
             {
-                oxyLoading.IsContentLoaded = false;
+                LoadedBool = false;
                 if (whichGraph != 4)
                 {
                     SeriesAll();
                 }
-                oxyLoading.IsContentLoaded = true;
+                LoadedBool = true;
+            }
+        }
+
+        private void processList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (processList.SelectedIndex < 0) return;
+
+            UInt32 pid = GlobalPref.requestCountList[processList.SelectedIndex].Key;
+
+            if (whichGraph != 0)
+            {
+                LoadedBool = false;
+                switch (whichGraph)
+                {
+                    case 1:
+                        this.PlotModel = AddrFreq((int)pid);
+                        this.PlotModel.InvalidatePlot(true);
+                        break;
+                    case 2:
+                        this.PlotModel = TimeAddr((int)pid);
+                        this.PlotModel.InvalidatePlot(true);
+                        break;
+                    case 3:
+                        this.PlotModel = TimeFreq((int)pid);
+                        this.PlotModel.InvalidatePlot(true);
+                        break;
+                    case 4:
+                        this.PlotModel = LatFreq((int)pid);
+                        this.PlotModel.InvalidatePlot(true);
+                        break;
+                    case 5:
+                        this.PlotModel = TimeLatAvg((int)pid);
+                        this.PlotModel.InvalidatePlot(true);
+                        break;
+                    case 6:
+                        this.PlotModel = Throughput((int)pid);
+                        this.PlotModel.InvalidatePlot(true);
+                        break;
+                }
+                LoadedBool = true;
+            }
+        }
+
+        private void allProcBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (whichGraph != 0)
+            {
+                LoadedBool = false;
+                switch (whichGraph)
+                {
+                    case 1:
+                        this.PlotModel = AddrFreq(-1);
+                        this.PlotModel.InvalidatePlot(true);
+                        break;
+                    case 2:
+                        this.PlotModel = TimeAddr(-1);
+                        this.PlotModel.InvalidatePlot(true);
+                        break;
+                    case 3:
+                        this.PlotModel = TimeFreq(-1);
+                        this.PlotModel.InvalidatePlot(true);
+                        break;
+                    case 4:
+                        this.PlotModel = LatFreq(-1);
+                        this.PlotModel.InvalidatePlot(true);
+                        break;
+                    case 5:
+                        this.PlotModel = TimeLatAvg(-1);
+                        this.PlotModel.InvalidatePlot(true);
+                        break;
+                    case 6:
+                        this.PlotModel = Throughput(-1);
+                        this.PlotModel.InvalidatePlot(true);
+                        break;
+                }
+                LoadedBool = true;
             }
         }
     }

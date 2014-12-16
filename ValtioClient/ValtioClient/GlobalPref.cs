@@ -103,6 +103,8 @@ namespace ValtioClient
         public static ProcessInfo totalInfo = new ProcessInfo();
         public static Dictionary<UInt32, ProcessInfo> processInfos = new Dictionary<UInt32, ProcessInfo>();
         public static List<UInt32> pids = new List<UInt32>();
+        public static Dictionary<UInt32, int> requestCount = new Dictionary<UInt32, int>();
+        public static List<KeyValuePair<uint, int>> requestCountList;
         public static UInt64 minBlock = 0, maxBlock = 0;
         public static UInt64 maxLat = 0;
 

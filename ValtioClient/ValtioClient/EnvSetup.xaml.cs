@@ -34,9 +34,9 @@ namespace ValtioClient
             if (GlobalPref.debug)
             {
                 GlobalPref.setDeviceID("/dev/sda");
-                GlobalPref.setTraceLength(60);
-                GlobalPref.setTimeWindow(2);
-                GlobalPref.setBlockUnit(1000);
+                GlobalPref.setTraceLength(3600);
+                GlobalPref.setTimeWindow(10000);
+                GlobalPref.setBlockUnit(1024); // 1024 sectors = 512KB
 
                 ShowTray();
             }
@@ -90,21 +90,7 @@ namespace ValtioClient
                 }
 
                 // Store block unit
-                if (errortype == 0)
-                {
-                    try
-                    {
-                        _blockUnit = Convert.ToInt32(blockUnit.Text);
-                    }
-                    catch (FormatException)
-                    {
-                        errortype = 6;
-                    }
-                    catch (OverflowException)
-                    {
-                        errortype = 7;
-                    }
-                }
+                _blockUnit = 1024; // 1024 as default
 
                 // Check for errors
                 if (errortype == 1)
@@ -126,14 +112,6 @@ namespace ValtioClient
                 else if (errortype == 5)
                 {
                     GlobalFunc.ShowMessageBox("Error", "Integer overflow: please input shorter time window.");
-                }
-                else if (errortype == 6)
-                {
-                    GlobalFunc.ShowMessageBox("Error", "Please input block unit in integer form.");
-                }
-                else if (errortype == 7)
-                {
-                    GlobalFunc.ShowMessageBox("Error", "Integer overflow: please input smaller block unit.");
                 }
                 else
                 {

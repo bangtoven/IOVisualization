@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:extra="http://schemas.extra.com/ui"
         xmlns:oxy="http://oxyplot.org/wpf"
-        Title="VALTIO" Height="600" Width="1000" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
+        Title="VALTIO" Height="650" Width="1000" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
         TitleBarBackground="#42b5e8" TitleBarForeground="White">
     <Grid>
         <Grid.RowDefinitions>
@@ -25,14 +25,20 @@
                 <ColumnDefinition Width="750"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
-            <extra:LoadingContent x:Name="oxyLoading" IsContentLoaded="True">
+            <extra:LoadingContent x:Name="oxyLoading" IsContentLoaded="{Binding LoadedBool}">
                 <oxy:PlotView Margin="10" Grid.Column="0" Model="{Binding PlotModel}"/>
             </extra:LoadingContent>
             <StackPanel Margin="10" Orientation="Vertical" Grid.Column="1">
                 <TextBlock Margin="10" HorizontalAlignment="Center" Text="Select process" FontSize="16" FontWeight="Bold"/>
-                <ListBox Width="150" Height="300" BorderBrush="LightGray" BorderThickness="1">
+                <ListBox x:Name="processList" Width="150" Height="300" BorderBrush="Gray" BorderThickness="1" SelectionChanged="processList_SelectionChanged">
 
                 </ListBox>
+                <Button x:Name="allProcBtn" Width="150" Content="All processes" Click="allProcBtn_Click"/>
+                <TextBlock Margin="10" HorizontalAlignment="Center" Text="Specify block unit" FontSize="16" FontWeight="Bold"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBox Width="80"/>
+                    <TextBlock Margin="10,0,0,0" Text="sectors"/>
+                </StackPanel>
                 <StackPanel Margin="0,30,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
                     <RadioButton x:Name="readRB" Content="Read" GroupName="IOtype" Click="readRB_Checked"/>
                     <RadioButton x:Name="writeRB" Margin="10,0,10,0" Content="Write" GroupName="IOtype" Click="writeRB_Checked"/>
